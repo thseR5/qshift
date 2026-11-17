@@ -335,11 +335,14 @@ def create_receive_app(
     def handle_statuses(statuses: list[IncomingStatus]) -> None:
         allowed = {"queued", "processing", "accepted", "sent", "delivered", "read", "failed"}
         with Session(database) as session, session.begin():
+            resolved = resolve_staff_sender(session, credentials)
+            if resolved is None:
+                return
             for status in statuses:
                 mapped = status.status if status.status in allowed else "unknown"
                 delivery = session.scalar(
                     select(OutboundDelivery).where(
-                        OutboundDelivery.firm_id == PILOT_FIRM,
+                        OutboundDelivery.firm_id == resolved.firm_id,
                         OutboundDelivery.provider_message_id == status.message_id,
                     )
                 )
