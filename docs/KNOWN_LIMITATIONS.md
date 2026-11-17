@@ -5,7 +5,7 @@ This file is intentionally explicit. A limitation is not a hidden roadmap commit
 - The default offline revision provider remains deterministic `MockLLM`; the production-oriented Ollama adapter is available only when explicitly configured.
 - Real-model accuracy is currently unmeasured because Ollama is not running in this environment. `make eval-live` reports the precise blocker without downloading a model.
 - Local Ollama `qwen3:1.7b` supports only the narrow wardrobe and two-item intake prompts.
-- The versioned live revision set contains 12 fictional English, Hindi, Hinglish, Telugu and Romanized Telugu cases, but it has not produced metrics without a running local model.
+- The versioned live revision set contains 55 fictional English, Hindi, Hinglish, Telugu and Romanized Telugu cases, but it has not produced metrics without a running local model.
 - Voice is a transcript fixture. Real audio download, decoding and speech transcription are not implemented.
 - Rate-card and quotation imports support simple CSV/XLSX schemas. PDF, scan, image and ERP ingestion are not implemented.
 - Import matching supports exact SKU, firm-scoped aliases and deterministic candidate lists; ambiguous matches still require a designer selection. Semantic/fuzzy ranking and PDF/photo extraction are not implemented.

@@ -1,6 +1,6 @@
 # Revision AI evaluation — v1
 
-Evaluation set: `qshift/fixtures/revision_eval_v1.json` (12 fictional requests).
+Evaluation set: `qshift/fixtures/revision_eval_v1.json` (55 fictional requests: 12 initial cases plus 43 independently written additions).
 
 ## Run status
 

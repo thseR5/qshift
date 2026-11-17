@@ -136,6 +136,7 @@ Changed:
 - Added explicit mapping overrides to rate-card and quotation import services and multipart API endpoints.
 - Added Studio preview/confirm mapping controls for nonstandard CSV/XLSX headers.
 - Added alias and explicit-mapping regression tests; validated browser JavaScript syntax with `node --check`.
+- Expanded the live evaluation set to 55 independently written fictional multilingual cases; no model result was fabricated.
 
 Verification:
 
