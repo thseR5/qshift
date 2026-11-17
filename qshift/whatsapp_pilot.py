@@ -143,10 +143,13 @@ def record_staff_consent(
             .on_conflict_do_nothing(index_elements=["firm_id", "enrollment_key"])
         )
         user = session.scalar(
-            select(User).where(
+            select(User)
+            .join(Firm, Firm.id == User.firm_id)
+            .where(
                 User.id == staff_user_id,
                 User.firm_id == PILOT_FIRM,
                 User.role.in_(["OWNER", "APPROVER", "DESIGNER"]),
+                Firm.illustrative.is_(True),
             )
         )
         if user is None:
