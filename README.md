@@ -37,7 +37,7 @@ For local AI intake, run Ollama on `127.0.0.1:11434`, pull `qwen3:1.7b`, and sta
 
 Revision extraction is provider-configurable. The safe default is the deterministic `mock` provider used by offline tests. To use a locally running Ollama model for revision proposals, set `QSHIFT_CHANGE_MODEL_PROVIDER=ollama` (and optionally `QSHIFT_CHANGE_MODEL`, `QSHIFT_OLLAMA_URL`, and `QSHIFT_CHANGE_TIMEOUT_SECONDS`). Ollama output is validated against a Pydantic schema and treated as an untrusted scope proposal. It cannot choose a rate, approve a draft, or issue a PDF. If the model is unavailable, Qshift creates a manual-review draft rather than mutating the quotation.
 
-Use `make eval-live` to run the versioned fictional revision set against the configured local model. The command reports an exact blocker when Ollama is unavailable; it never downloads a model or contacts a paid provider automatically.
+Use `make eval-live` to run the versioned fictional revision set against the configured local model. It records raw model responses, normalized proposals, validation errors and latency. It never downloads a model or contacts a paid provider automatically. The measured `qwen3:1.7b` result is documented in `docs/REVISION_AI_EVALUATION.md` and is not a release-quality accuracy claim.
 
 With local AI enabled, choose **Start two-item AI sample**. The example quotes a second-bedroom wardrobe and a living-room gypsum ceiling. Answer the ceiling-area follow-up with **100 sq ft**. The initial quote is ₹78,500. Use the ceiling line’s **Recalculate** button to change its billable area to 90 sq ft, which brings the quote to ₹77,650. Switch to **Dev · Approver**, approve, and download the approved PDF from the simulated chat. All quantities and rates are fictional. This intake supports one of each of the two sample items.
 
@@ -85,7 +85,7 @@ For the browser version, start `make run`, pin Sharma Residence, choose **Use Te
 - `make test` — run unit, workflow, API, and property tests with coverage output.
 - `make lint` — run Ruff and strict mypy on the engine/approval packages.
 - `make eval` — report offline synthetic fixture scores by language.
-- `make eval-live` — reports that no live LLM adapter exists in this scope.
+- `make eval-live` — run the 55-case real-model evaluation when Ollama is configured; use `QSHIFT_EVAL_START`/`QSHIFT_EVAL_LIMIT` for a slice.
 - `make demo` — run the repeatable offline scenario.
 - `make clean-demo` — delete only local demo database and generated demo PDFs.
 
@@ -95,7 +95,7 @@ The synthetic set contains 180 labeled messages across English, Hindi, Telugu an
 
 Rate-card CSV/XLSX imports accept the canonical columns `sku,name,category,unit,rate_paise,gst_bps,aliases` plus safe aliases such as `Item Code`, `Description`, `UOM`, `Unit Price`, `GST %` and `Synonyms`. Use `POST /api/imports/rate-card/preview` to inspect the detected mapping without writing the database. Imported rows start unverified. An OWNER or APPROVER must verify rates before the catalogue can use them. Aliases are inert firm-scoped metadata used only for candidate matching.
 
-Quotation CSV/XLSX imports accept `room,sku,quantity` plus safe aliases such as `Room Name`, `Item Code`, `Qty` and `Space`. Use `POST /api/imports/quotation/preview` for a read-only mapping preview. Only SKUs already verified for the firm are accepted. PDF and photo extraction is intentionally unsupported.
+Quotation CSV/XLSX imports accept `room,sku,quantity` plus safe aliases such as `Room Name`, `Item Code`, `Qty` and `Space`. Use `POST /api/imports/quotation/preview` for a read-only mapping preview. Only SKUs already verified for the firm are accepted. The import response includes `unmatched_items` with deterministic verified-SKU suggestions for review; it does not silently accept or verify them. PDF and photo extraction is intentionally unsupported.
 
 Blank CSV and XLSX templates are in `qshift/fixtures/templates/`.
 

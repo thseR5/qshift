@@ -9,15 +9,16 @@
 - Added candidate lists and clarification states for ambiguous target lines or catalogue choices.
 - Added quantity/dimension modification handling through the existing Decimal/paise pricing engine.
 - Added safe open-draft amendment handling for model-proposed corrections; approved versions remain append-only.
-- Added a versioned 55-case live evaluation set and `make eval-live` runner with precise offline blocker reporting.
-- Added `docs/REVISION_AI_EVALUATION.md` so unavailable live-model results are visible instead of replaced with mock scores.
+- Added a versioned 55-case live evaluation set and `make eval-live` runner with raw-response capture, latency, operation metrics and held-out slices.
+- Activated and measured Ollama `qwen3:1.7b`; the resulting low operation F1 is recorded in `docs/REVISION_AI_EVALUATION.md` and blocks real-firm use.
 - Added regression tests for provider selection, schema validation, aliases, quantity changes and corrections.
 - Added Studio UI mapping previews for rate cards and quotations, with explicit column confirmation before database writes.
+- Added deterministic unmatched-item review records and Studio display after quotation import.
 
 ## Immediate next work
 
-1. Run `make eval-live` on a local Ollama installation with `qwen3:1.7b`; review ten concrete examples and measure latency, matching and clarification metrics.
-2. Add unmatched-item candidate review after quotation import.
+1. Improve multilingual extraction and source grounding, then re-run the full and held-out evaluations; do not use qwen3:1.7b for a real-firm pilot.
+2. Turn unmatched-item review into a persisted correction queue with explicit authorization.
 3. Expand multilingual holdout coverage with founder-reviewed fictional examples.
 4. Add production identity, retention, monitoring, restore and document-access gates before any real-firm data.
 
