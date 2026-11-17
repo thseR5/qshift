@@ -10,6 +10,7 @@
 - Added quantity/dimension modification handling through the existing Decimal/paise pricing engine.
 - Added safe open-draft amendment handling for model-proposed corrections; approved versions remain append-only.
 - Added a versioned 12-case live evaluation set and `make eval-live` runner with precise offline blocker reporting.
+- Added `docs/REVISION_AI_EVALUATION.md` so unavailable live-model results are visible instead of replaced with mock scores.
 - Added regression tests for provider selection, schema validation, aliases, quantity changes and corrections.
 
 ## Immediate next work
