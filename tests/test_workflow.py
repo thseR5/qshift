@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import select
 
 from qshift.agent.extraction import ChangeExtraction, ChangeOp
+from qshift.agent.local_model import LocalModelUnavailable
 from qshift.models import Firm, Project, QuoteVersion, RateEntry, User
 from qshift.services import (
     approve_draft,
@@ -218,3 +219,19 @@ def test_open_draft_correction_changes_only_target_line(session, monkeypatch):
     ceiling = next(line for line in corrected["lines"] if line["room"] == "Bedroom")
     assert kitchen["quantity"] == "45.000"
     assert ceiling["quantity"] == "120.000"
+
+
+def test_model_failure_creates_manual_review_without_mutating_quote(session, monkeypatch):
+    seed_demo(session)
+    designer, _ = users(session)
+    assert designer
+
+    class BrokenProvider:
+        def extract(self, _text, _context):
+            raise LocalModelUnavailable("synthetic model outage")
+
+    monkeypatch.setattr("qshift.services.get_change_extractor", lambda: BrokenProvider())
+    draft = submit_change(session, designer, "project-sharma", "replace the countertop")
+    assert draft["status"] == "NEEDS_CLARIFICATION"
+    assert "synthetic model outage" in draft["manual_review"]
+    assert draft["original_total_paise"] == draft["revised_total_paise"]

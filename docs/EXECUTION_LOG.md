@@ -108,7 +108,7 @@ Verification:
 
 ```text
 make test
-50 passed, 1 warning; engine/approval coverage remained 94%
+51 passed, 1 warning; engine/approval coverage remained 94%
 
 make lint
 Ruff passed; configured engine/approval mypy passed
