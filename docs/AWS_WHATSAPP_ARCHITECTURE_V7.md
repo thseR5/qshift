@@ -72,7 +72,9 @@ automatic retry.
 
 ## Meta boundary
 
-The repository's adapter is clearly **SIMULATED** and uses fictional data. Live Meta callbacks,
-external sends, real customer data, billing, production DNS and commercial eligibility review
-remain disabled until the account owner separately authorizes and verifies them against Meta's
-current WhatsApp Business Platform terms and messaging policies.
+The repository's adapter is clearly **SIMULATED** and uses fictional data. Meta's current
+[WhatsApp Business Platform overview](https://developers.facebook.com/documentation/business-messaging/whatsapp/overview/)
+documents Cloud API, webhooks and authentication; the [WhatsApp Business Messaging Policy](https://business.whatsapp.com/policy/)
+governs permitted business messaging. Live Meta callbacks, external sends, real customer data,
+billing, production DNS and commercial eligibility review remain disabled until the account
+owner separately authorizes and verifies them against the current terms and policies.
