@@ -120,6 +120,15 @@ No model was downloaded and no paid provider was contacted.
 
 The live-model metrics are intentionally not fabricated. Offline fixture scores remain mock-only evidence.
 
+Full modified-module mypy check was also run with:
+
+```text
+.venv/bin/python -m mypy qshift/agent/extraction.py qshift/services.py qshift/models.py qshift/api/main.py
+75 errors in 9 files
+```
+
+The errors are existing repository-wide typing debt and missing third-party stubs (plus transitive modules imported by the checked files); the configured `make lint` gate remains green for `qshift/engine` and `qshift/approval`.
+
 ## Next entry format
 
 ```text
