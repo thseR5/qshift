@@ -75,6 +75,7 @@ class RateEntry(Base):
     rate_paise: Mapped[int] = mapped_column(Integer)
     gst_bps: Mapped[int] = mapped_column(Integer, default=0)
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    aliases: Mapped[list[str]] = mapped_column(JSON, default=list)
 
 
 class Quote(Base):

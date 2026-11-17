@@ -33,6 +33,12 @@ The demo supports one white-laminate wardrobe and explicitly stated dimensions i
 
 For local AI intake, run Ollama on `127.0.0.1:11434`, pull `qwen3:1.7b`, and start QShift with `QSHIFT_INTAKE_MODEL=ollama make run`. Start a new fictional sample. The local model reads the conversation and proposes source-linked scope fields. QShift validates those fields, looks up the verified catalogue rate, calculates the quote, and requires human approval. If the model fails, this mode returns an error and lets you retry the message.
 
+### Natural-language revision extraction
+
+Revision extraction is provider-configurable. The safe default is the deterministic `mock` provider used by offline tests. To use a locally running Ollama model for revision proposals, set `QSHIFT_CHANGE_MODEL_PROVIDER=ollama` (and optionally `QSHIFT_CHANGE_MODEL`, `QSHIFT_OLLAMA_URL`, and `QSHIFT_CHANGE_TIMEOUT_SECONDS`). Ollama output is validated against a Pydantic schema and treated as an untrusted scope proposal. It cannot choose a rate, approve a draft, or issue a PDF. If the model is unavailable, Qshift creates a manual-review draft rather than mutating the quotation.
+
+Use `make eval-live` to run the versioned fictional revision set against the configured local model. The command reports an exact blocker when Ollama is unavailable; it never downloads a model or contacts a paid provider automatically.
+
 With local AI enabled, choose **Start two-item AI sample**. The example quotes a second-bedroom wardrobe and a living-room gypsum ceiling. Answer the ceiling-area follow-up with **100 sq ft**. The initial quote is ₹78,500. Use the ceiling line’s **Recalculate** button to change its billable area to 90 sq ft, which brings the quote to ₹77,650. Switch to **Dev · Approver**, approve, and download the approved PDF from the simulated chat. All quantities and rates are fictional. This intake supports one of each of the two sample items.
 
 ### Simulated WhatsApp client rehearsal
@@ -87,7 +93,7 @@ The synthetic set contains 180 labeled messages across English, Hindi, Telugu an
 
 ## Imports
 
-Rate-card CSV/XLSX imports accept the canonical columns `sku,name,category,unit,rate_paise,gst_bps` plus safe aliases such as `Item Code`, `Description`, `UOM`, `Unit Price` and `GST %`. Use `POST /api/imports/rate-card/preview` to inspect the detected mapping without writing the database. Imported rows start unverified. An OWNER or APPROVER must verify rates before the catalogue can use them.
+Rate-card CSV/XLSX imports accept the canonical columns `sku,name,category,unit,rate_paise,gst_bps,aliases` plus safe aliases such as `Item Code`, `Description`, `UOM`, `Unit Price`, `GST %` and `Synonyms`. Use `POST /api/imports/rate-card/preview` to inspect the detected mapping without writing the database. Imported rows start unverified. An OWNER or APPROVER must verify rates before the catalogue can use them. Aliases are inert firm-scoped metadata used only for candidate matching.
 
 Quotation CSV/XLSX imports accept `room,sku,quantity` plus safe aliases such as `Room Name`, `Item Code`, `Qty` and `Space`. Use `POST /api/imports/quotation/preview` for a read-only mapping preview. Only SKUs already verified for the firm are accepted. PDF and photo extraction is intentionally unsupported.
 
@@ -97,7 +103,7 @@ Money is stored as integer paise. Quantity is parsed as `Decimal`; line totals r
 
 ## Configuration
 
-Copy `.env.example` to `.env` if you want to change the settings. Set `DATABASE_URL` to a SQLAlchemy URL for PostgreSQL 16 when one is available. SQLite is the tested offline default. `QSHIFT_LLM_PROVIDER=mock` and `QSHIFT_TRANSCRIBER=mock` keep processing offline. No real adapter is currently implemented. `QSHIFT_APPROVAL_SECRET` is for local demonstration only and must be a unique, managed secret before any real environment.
+Copy `.env.example` to `.env` if you want to change the settings. Set `DATABASE_URL` to a SQLAlchemy URL for PostgreSQL 16 when one is available. SQLite is the tested offline default. `QSHIFT_LLM_PROVIDER=mock` and `QSHIFT_TRANSCRIBER=mock` keep intake processing offline. Revision extraction uses `QSHIFT_CHANGE_MODEL_PROVIDER=mock` unless explicitly set to `ollama`. `QSHIFT_APPROVAL_SECRET` is for local demonstration only and must be a unique, managed secret before any real environment.
 
 ## India founding plan
 

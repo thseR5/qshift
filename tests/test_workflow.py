@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import select
 
+from qshift.agent.extraction import ChangeExtraction, ChangeOp
 from qshift.models import Firm, Project, QuoteVersion, RateEntry, User
 from qshift.services import (
     approve_draft,
@@ -129,3 +130,91 @@ def test_cross_tenant_project_access_is_denied(session):
         pin_project(session, user, "project-other")
     with pytest.raises(LookupError):
         versions(session, user, "project-other")
+
+
+def test_provider_proposal_modifies_quantity_without_pricing_authority(session, monkeypatch):
+    seed_demo(session)
+    designer, _ = users(session)
+    assert designer
+
+    class Provider:
+        def extract(self, _text, _context):
+            return ChangeExtraction(
+                intent="MODIFY",
+                operations=[
+                    ChangeOp(
+                        op="MODIFY",
+                        room="Kitchen",
+                        target_text="countertop",
+                        quantity="50",
+                        unit="sqft",
+                        source_span="make the countertop 50 sqft",
+                        confidence=0.8,
+                        status="PROPOSED",
+                    )
+                ],
+            )
+
+    monkeypatch.setattr("qshift.services.get_change_extractor", lambda: Provider())
+    draft = submit_change(session, designer, "project-sharma", "make the countertop 50 sqft")
+    assert draft["status"] == "DRAFT_READY"
+    kitchen = next(line for line in draft["lines"] if line["room"] == "Kitchen")
+    assert kitchen["quantity"] == "50.000"
+    assert kitchen["rate_paise"] == 65000
+
+
+def test_open_draft_correction_changes_only_target_line(session, monkeypatch):
+    seed_demo(session)
+    designer, _ = users(session)
+    assert designer
+
+    class Provider:
+        def __init__(self):
+            self.calls = 0
+
+        def extract(self, _text, _context):
+            self.calls += 1
+            if self.calls == 1:
+                return ChangeExtraction(
+                    intent="MODIFY",
+                    operations=[
+                        ChangeOp(
+                            op="MODIFY",
+                            room="Kitchen",
+                            target_text="countertop",
+                            quantity="50",
+                            unit="sqft",
+                            source_span="make the countertop 50 sqft",
+                            confidence=0.8,
+                            status="PROPOSED",
+                        )
+                    ],
+                )
+            return ChangeExtraction(
+                intent="CORRECT_PREVIOUS_CHANGE",
+                operations=[
+                    ChangeOp(
+                        op="CORRECT_PREVIOUS_CHANGE",
+                        room="Kitchen",
+                        target_text="countertop",
+                        quantity="45",
+                        unit="sqft",
+                        target_line_id="line-kitchen-counter",
+                        source_span="correction, make it 45 sqft",
+                        confidence=0.8,
+                        status="PROPOSED",
+                    )
+                ],
+            )
+
+    provider = Provider()
+    monkeypatch.setattr("qshift.services.get_change_extractor", lambda: provider)
+    first = submit_change(session, designer, "project-sharma", "make the countertop 50 sqft")
+    from qshift.services import amend_open_draft
+
+    corrected = amend_open_draft(session, designer, first["id"], "correction, make it 45 sqft")
+    assert corrected and corrected["status"] == "DRAFT_READY"
+    kitchen = next(line for line in corrected["lines"] if line["room"] == "Kitchen")
+    ceiling = next(line for line in corrected["lines"] if line["room"] == "Bedroom")
+    assert kitchen["quantity"] == "45.000"
+    assert ceiling["quantity"] == "120.000"

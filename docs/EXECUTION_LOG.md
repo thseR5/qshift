@@ -92,6 +92,34 @@ Demo complete. No live messaging or external send occurred.
 PDF generated: demo-output/sharma-residence-quote-v2.pdf
 ```
 
+## 2026-11-17 — real-customer-intelligence implementation slice
+
+Changed:
+
+- Added `ChangeExtraction`, validated operation schemas and provider selection in `qshift/agent/extraction.py`.
+- Added an explicit Ollama adapter using `QSHIFT_CHANGE_MODEL_PROVIDER=ollama`; its output is untrusted and cannot price, approve or issue documents.
+- Replaced the service-layer revision path's direct hard-coded dependency with configurable extraction plus manual-review fallback when the model is unavailable.
+- Added deterministic quotation-line/catalogue matching, firm-scoped aliases, ambiguous candidate handling and quantity/dimension modification support.
+- Added persistent open-draft amendment handling for corrections without changing approved versions.
+- Added migration `0010_rate_entry_aliases` and import persistence for inert aliases.
+- Added `qshift/fixtures/revision_eval_v1.json` and `evals/run_live_eval.py`.
+
+Verification:
+
+```text
+make test
+50 passed, 1 warning; engine/approval coverage remained 94%
+
+make lint
+Ruff passed; configured engine/approval mypy passed
+
+make eval-live
+LIVE EVAL BLOCKED: Ollama is unavailable at http://127.0.0.1:11434/api/chat
+No model was downloaded and no paid provider was contacted.
+```
+
+The live-model metrics are intentionally not fabricated. Offline fixture scores remain mock-only evidence.
+
 ## Next entry format
 
 ```text

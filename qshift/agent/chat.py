@@ -5,9 +5,11 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from qshift.agent.local_model import LocalModelUnavailable
 from qshift.engine.pricing import format_inr
 from qshift.models import Draft, QuoteVersion, User
 from qshift.services import (
+    amend_open_draft,
     cancel_draft,
     draft_view,
     pin_project,
@@ -15,6 +17,7 @@ from qshift.services import (
     projects_for_user,
     require_project,
     resolve_catalogue,
+    resolve_catalogue_text,
     submit_change,
     versions,
 )
@@ -146,6 +149,35 @@ def respond_to_message(
         if base is None:
             raise LookupError("Base quotation version not found")
         return draft_reply(draft_view(draft, base.total_paise, base.lines))
+    open_query = select(Draft).where(
+        Draft.firm_id == user.firm_id,
+        Draft.project_id == project.id,
+        Draft.status.in_(OPEN_DRAFT_STATUSES),
+    )
+    if draft_id is not None:
+        open_query = open_query.where(Draft.id == draft_id)
+    open_draft = session.scalar(open_query)
+    if open_draft is not None:
+        resolved = resolve_catalogue_text(session, user, open_draft.id, message, commit=commit)
+        if resolved is not None:
+            base = session.scalar(
+                select(QuoteVersion).where(
+                    QuoteVersion.firm_id == user.firm_id,
+                    QuoteVersion.quote_id == open_draft.quote_id,
+                    QuoteVersion.number == open_draft.base_version,
+                )
+            )
+            return draft_reply(draft_view(open_draft, base.total_paise if base else 0, base.lines if base else []))
+        try:
+            amended = amend_open_draft(session, user, open_draft.id, message, commit=commit)
+        except LocalModelUnavailable:
+            amended = None
+        if amended is not None:
+            return draft_reply(amended)
+        return {
+            "reply": "The open draft still needs a specific verified catalogue choice. Reply with the SKU or exact catalogue name shown above, or use cancel.",
+            "draft_id": open_draft.id,
+        }
     result = submit_change(session, user, project.id, message, commit=commit)
     if result.get("intent") == "out_of_scope":
         return {"reply": HELP}

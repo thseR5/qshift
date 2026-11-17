@@ -30,7 +30,7 @@ eval:
 	$(PYTHON) -m evals.run_eval
 
 eval-live:
-	@echo 'No live LLM adapter is configured in this offline scope. Set provider and implement its adapter before use.'
+	$(PYTHON) -m evals.run_live_eval
 
 demo:
 	$(PYTHON) -m qshift.demo

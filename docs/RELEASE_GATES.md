@@ -4,13 +4,13 @@
 
 Required: reproducible local environment, deterministic pricing and approval regressions, tenant-isolation tests and fictional data only.
 
-Status: **SUBSTANTIALLY PRESENT**. The current run has 40 passing tests. Full application type-check and production security are not clean.
+Status: **SUBSTANTIALLY PRESENT**. The current run has 50 passing tests and deterministic financial/approval regressions remain green. Full application type-check and production security are not clean.
 
 ## Gate B — client demonstration
 
 Required: truthful fictional-data workflow, real local model versus mock clearly labeled, no fabricated customer results, support contact and failure fallback.
 
-Status: **PREPARABLE / NOT FORMALLY SIGNED OFF**.
+Status: **PREPARABLE / NOT FORMALLY SIGNED OFF**. The public entry point and local Ollama revision adapter are present, but live-model evidence is blocked until a local model is available.
 
 ## Gate C — founder-operated real-firm pilot
 

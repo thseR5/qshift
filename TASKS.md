@@ -35,6 +35,9 @@ Colab notebook: created but not executed in Colab; marked unverified.
 - [x] Add conversational cancellation and explicit draft/version ambiguity handling.
 - [x] Add regression tests for the new onboarding and conversation states.
 - [x] Add a truthful local public entry point that links to the simulated demo without claiming deployment or live WhatsApp.
+- [x] Add provider-independent, schema-validated revision extraction with explicit Ollama configuration.
+- [x] Add deterministic quotation-line/catalogue matching, firm aliases and ambiguous candidate clarification.
+- [x] Add open-draft correction handling and a versioned live-model evaluation runner.
 
 ## P0 safety invariants
 

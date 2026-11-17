@@ -81,3 +81,18 @@ def test_import_accepts_alias_headers_and_percent_gst(session):
     assert result["mapping"]["rate_paise"] == "Unit Price"
     entry = session.scalar(select(RateEntry).where(RateEntry.sku == "NEW-2"))
     assert entry and entry.gst_bps == 1800 and not entry.verified
+
+
+def test_import_persists_firm_specific_catalogue_aliases(session):
+    seed_demo(session)
+    owner = session.scalar(select(User).where(User.id == "user-owner"))
+    assert owner
+    result = import_rate_card(
+        session,
+        owner,
+        "rates.csv",
+        b"sku,name,category,unit,rate_paise,aliases\nNEW-3,Quartz slab,Countertop,sqft,70000,white stone;quartz slab\n",
+    )
+    assert result["accepted"] == 1
+    entry = session.scalar(select(RateEntry).where(RateEntry.sku == "NEW-3"))
+    assert entry and entry.aliases == ["white stone", "quartz slab"]

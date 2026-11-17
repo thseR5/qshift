@@ -9,6 +9,7 @@ import json
 import os
 import re
 import uuid
+from collections.abc import Sequence
 from datetime import UTC, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
@@ -22,7 +23,12 @@ from reportlab.pdfgen import canvas
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from qshift.agent.extraction import MockLLM
+from qshift.agent.extraction import (
+    ChangeExtraction,
+    ChangeOp,
+    get_change_extractor,
+)
+from qshift.agent.local_model import LocalModelUnavailable
 from qshift.approval.core import issue_token, token_digest, validate_token
 from qshift.engine.pricing import (
     format_inr,
@@ -80,6 +86,9 @@ RATE_HEADER_ALIASES = {
     "gst": "gst_percent",
     "gst_percent": "gst_percent",
     "gst_percentage": "gst_percent",
+    "aliases": "aliases",
+    "alternate_names": "aliases",
+    "synonyms": "aliases",
 }
 QUOTE_HEADER_ALIASES = {
     "room": "room",
@@ -447,6 +456,14 @@ def _gst_bps(row: dict[str, Any]) -> int:
     return int(row.get("gst_bps", 0) or 0)
 
 
+def _aliases(value: Any) -> list[str]:
+    """Parse user-supplied aliases as inert catalogue metadata."""
+
+    if value is None:
+        return []
+    return [part.strip() for part in re.split(r"[,;|]", str(value)) if part.strip()][:20]
+
+
 def import_rate_card(session: Session, user: User, filename: str, content: bytes) -> dict[str, Any]:
     rows, mapping, _ = _read_tabular(filename, content, RATE_HEADER_ALIASES)
     errors: list[str] = []
@@ -513,6 +530,7 @@ def import_rate_card(session: Session, user: User, filename: str, content: bytes
                 rate_paise=rate,
                 gst_bps=gst_bps,
                 verified=False,
+                aliases=_aliases(row.get("aliases")),
             )
         )
         imported_entries.append({"id": entry_id, "sku": sku, "name": str(row.get("name", sku))})
@@ -646,6 +664,151 @@ def import_quotation(
     }
 
 
+def _match_tokens(value: str | None) -> set[str]:
+    if not value:
+        return set()
+    tokens = re.findall(r"[a-z0-9]+", value.casefold())
+    return {token for token in tokens if len(token) > 2}
+
+
+def _line_score(op: dict[str, Any], line: dict[str, Any]) -> int:
+    score = 0
+    room = str(op.get("room") or "").casefold().strip()
+    line_room = str(line.get("room") or "").casefold().strip()
+    if room and (room == line_room or room in line_room or line_room in room):
+        score += 8
+    target = _match_tokens(op.get("target_text"))
+    line_words = _match_tokens(
+        " ".join(str(line.get(key, "")) for key in ("description", "category", "sku"))
+    )
+    score += 2 * len(target & line_words)
+    if op.get("target_line_id") == line.get("line_id"):
+        score += 100
+    return score
+
+
+def _line_candidates(op: dict[str, Any], lines: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    scored = [(line, _line_score(op, line)) for line in lines]
+    positive = [(line, score) for line, score in scored if score > 0]
+    if not positive:
+        return []
+    highest = max(score for _, score in positive)
+    return [line for line, score in positive if score == highest]
+
+
+def _catalogue_candidates(
+    session: Session,
+    user: User,
+    quote: Quote,
+    op: dict[str, Any],
+) -> list[RateEntry]:
+    entries = session.scalars(
+        select(RateEntry).where(
+            RateEntry.firm_id == user.firm_id,
+            RateEntry.rate_card_id == quote.rate_card_id,
+            RateEntry.verified.is_(True),
+        )
+    ).all()
+    requested = _match_tokens(op.get("replacement_text") or op.get("target_text"))
+    # For REPLACE, the legacy fixture stores the old/source SKU in ``sku``;
+    # only treat it as a destination SKU when no replacement wording exists.
+    exact_sku = "" if op.get("replacement_text") else str(op.get("sku") or "").casefold()
+    ranked: list[tuple[RateEntry, int]] = []
+    for entry in entries:
+        if exact_sku and entry.sku.casefold() == exact_sku:
+            ranked.append((entry, 100))
+            continue
+        searchable = _match_tokens(
+            " ".join([entry.sku, entry.name, entry.category, *(entry.aliases or [])])
+        )
+        overlap = len(requested & searchable)
+        if overlap:
+            ranked.append((entry, overlap))
+    if not ranked:
+        return []
+    highest = max(score for _, score in ranked)
+    return [entry for entry, score in ranked if score == highest]
+
+
+def _option(entry: RateEntry) -> dict[str, Any]:
+    return {"sku": entry.sku, "name": entry.name, "rate_paise": entry.rate_paise, "unit": entry.unit}
+
+
+def _normalise_operations(result: ChangeExtraction | list[dict[str, Any]]) -> list[dict[str, Any]]:
+    if isinstance(result, ChangeExtraction):
+        return [operation.model_dump(mode="json") for operation in result.operations]
+    return [ChangeOp.model_validate(operation).model_dump(mode="json") for operation in result]
+
+
+def _model_context(base: QuoteVersion, entries: Sequence[RateEntry]) -> dict[str, Any]:
+    return {
+        "quotation_lines": [
+            {
+                "line_id": line["line_id"],
+                "room": line["room"],
+                "category": line["category"],
+                "description": line["description"],
+                "sku": line["sku"],
+                "quantity": line["quantity"],
+                "unit": line["unit"],
+            }
+            for line in base.lines
+        ],
+        "verified_catalogue": [
+            {
+                "sku": entry.sku,
+                "name": entry.name,
+                "category": entry.category,
+                "unit": entry.unit,
+                "aliases": entry.aliases or [],
+            }
+            for entry in entries
+        ],
+    }
+
+
+def _manual_review_draft(
+    session: Session,
+    user: User,
+    project_id: str,
+    quote: Quote,
+    base: QuoteVersion,
+    text: str,
+    reason: str,
+    *,
+    commit: bool,
+) -> dict[str, Any]:
+    op = ChangeOp(
+        op="CLARIFY",
+        target_text=text[:160],
+        source_span=text[:200],
+        confidence=0,
+        status="NEEDS_INFO",
+        missing_fields=["manual_review"],
+    ).model_dump(mode="json")
+    draft = Draft(
+        id=uid(),
+        firm_id=user.firm_id,
+        project_id=project_id,
+        quote_id=quote.id,
+        base_version=base.number,
+        rate_card_id=quote.rate_card_id,
+        ops=[op],
+        lines=[dict(line) for line in base.lines],
+        total_paise=base.total_paise,
+        content_sha256=canonical_hash(base.lines),
+        status="NEEDS_CLARIFICATION",
+        created_by=user.id,
+    )
+    session.add(draft)
+    audit(session, user.firm_id, user.id, "CHANGE_MANUAL_REVIEW", draft.id, reason)
+    if commit:
+        session.commit()
+    result = draft_view(draft, base.total_paise, base.lines)
+    result["manual_review"] = reason
+    return result
+
+
 def submit_change(
     session: Session, user: User, project_id: str, text: str, *, commit: bool = True
 ) -> dict[str, Any]:
@@ -655,6 +818,22 @@ def submit_change(
     )
     if quote is None or quote.current_version == 0:
         raise LookupError("Approve the first quotation before requesting revisions")
+    base = session.scalar(
+        select(QuoteVersion).where(
+            QuoteVersion.firm_id == user.firm_id,
+            QuoteVersion.quote_id == quote.id,
+            QuoteVersion.number == quote.current_version,
+        )
+    )
+    if base is None:
+        raise LookupError("Current quotation version not found")
+    entries = session.scalars(
+        select(RateEntry).where(
+            RateEntry.firm_id == user.firm_id,
+            RateEntry.rate_card_id == quote.rate_card_id,
+            RateEntry.verified.is_(True),
+        )
+    ).all()
     existing = session.scalar(
         select(Draft).where(
             Draft.firm_id == user.firm_id,
@@ -662,65 +841,133 @@ def submit_change(
             Draft.status.in_(["NEEDS_CLARIFICATION", "DRAFT_READY"]),
         )
     )
-    if existing:
-        raise ValueError("This project already has an open draft")
-    llm = MockLLM()
-    if llm.classify(text) != "submit_change_request":
-        return {
-            "intent": "out_of_scope",
-            "reply": "I can pin a project, revise a quotation from your request, review or approve a draft, show version history, or summarize recorded project changes. Type help for options.",
-        }
-    base = session.scalar(
-        select(QuoteVersion).where(
-            QuoteVersion.firm_id == user.firm_id,
-            QuoteVersion.quote_id == quote.id, QuoteVersion.number == quote.current_version
+    extractor = get_change_extractor()
+    try:
+        extracted = extractor.extract(text, _model_context(base, entries))
+    except LocalModelUnavailable as exc:
+        if existing:
+            raise ValueError(f"The AI parser is unavailable; keep the open draft for manual review. {exc}") from exc
+        return _manual_review_draft(
+            session,
+            user,
+            project_id,
+            quote,
+            base,
+            text,
+            str(exc),
+            commit=commit,
         )
-    )
-    assert base is not None
-    ops = llm.extract(text)
+    ops = _normalise_operations(extracted)
+    if isinstance(extracted, list) and isinstance(extractor, type(get_change_extractor("mock"))):
+        if extractor.classify(text) != "submit_change_request":  # type: ignore[attr-defined]
+            return {"intent": "out_of_scope", "reply": "This message needs a quotation-change request or manual review."}
+    if not ops or all(op["op"] in {"UNRELATED_MESSAGE", "SELECT_PROJECT", "PROJECT_STATUS"} for op in ops):
+        return {"intent": "out_of_scope", "reply": "This message is not a quotation-change request."}
+    if existing:
+        if any(op["op"] in {"CLARIFICATION_REPLY", "CORRECT_PREVIOUS_CHANGE"} for op in ops):
+            raise ValueError("Use the open draft's clarification or catalogue-selection action to update it safely")
+        raise ValueError("This project already has an open draft")
     output_lines = [dict(line) for line in base.lines]
     for op in ops:
+        if op["op"] in {"UNRELATED_MESSAGE", "SELECT_PROJECT", "PROJECT_STATUS"}:
+            op["status"], op["missing_fields"] = "NEEDS_INFO", ["scope"]
+            continue
+        if op["op"] == "CANCEL":
+            op["status"] = "CANCELLED"
+            continue
         if op["op"] == "REMOVE":
-            idx = next(
-                (
-                    i
-                    for i, line in enumerate(output_lines)
-                    if line["room"].casefold() == str(op["room"]).casefold()
-                    and "ceiling" in line["category"].casefold()
-                ),
-                None,
-            )
-            if idx is None:
-                op["status"], op["missing_fields"] = "NEEDS_INFO", ["target"]
-            else:
-                removed = output_lines.pop(idx)
-                op["resolved_line_id"] = removed["line_id"]
-                op["removed_line"] = removed
+            candidates = _line_candidates(op, output_lines)
+            if len(candidates) != 1:
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["target_line"]
+                op["options"] = [
+                    {"line_id": line["line_id"], "room": line["room"], "description": line["description"]}
+                    for line in candidates
+                ]
+                continue
+            removed = candidates[0]
+            output_lines.remove(removed)
+            op["resolved_line_id"] = removed["line_id"]
+            op["removed_line"] = removed
+            op["status"] = "VERIFIED"
         elif op["op"] == "REPLACE":
-            matches = session.scalars(
-                select(RateEntry).where(
-                    RateEntry.firm_id == user.firm_id,
-                    RateEntry.rate_card_id == quote.rate_card_id,
-                    RateEntry.verified.is_(True),
-                    RateEntry.name.ilike("%quartz%"),
+            source_candidates = _line_candidates(op, base.lines)
+            catalogue = _catalogue_candidates(session, user, quote, op)
+            if len(source_candidates) != 1:
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["target_line"]
+                continue
+            source_line = source_candidates[0]
+            op["resolved_line_id"] = source_line["line_id"]
+            op["options"] = [_option(entry) for entry in catalogue]
+            if not catalogue:
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["verified_rate"]
+                continue
+            if len(catalogue) != 1:
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["catalogue_selection"]
+                continue
+            entry = catalogue[0]
+            replacement = {
+                **source_line,
+                "description": entry.name,
+                "sku": entry.sku,
+                "rate_paise": entry.rate_paise,
+                "total_paise": money_for_quantity(source_line["quantity"], entry.rate_paise),
+                "gst_bps": entry.gst_bps,
+            }
+            output_lines = [replacement if line["line_id"] == source_line["line_id"] else line for line in output_lines]
+            op.update({"sku": entry.sku, "selected_name": entry.name, "status": "VERIFIED", "missing_fields": []})
+        elif op["op"] in {"MODIFY", "CORRECT_PREVIOUS_CHANGE"}:
+            candidates = _line_candidates(op, output_lines)
+            if len(candidates) != 1:
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["target_line"]
+                continue
+            quantity = op.get("quantity")
+            if not quantity and op.get("width_ft") and op.get("height_ft"):
+                quantity = str(
+                    (Decimal(op["width_ft"]) * Decimal(op["height_ft"])).quantize(Decimal("0.001"))
                 )
-            ).all()
-            op["options"] = [
-                {"sku": e.sku, "name": e.name, "rate_paise": e.rate_paise, "unit": e.unit}
-                for e in matches
-            ]
-            source_line = next(
-                (
-                    line
-                    for line in base.lines
-                    if line["room"] == op["room"] and line["category"] == "Countertop"
-                ),
-                None,
-            )
-            if source_line:
-                op["resolved_line_id"] = source_line["line_id"]
+            if not quantity:
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["quantity_or_dimensions"]
+                continue
+            try:
+                quantity_decimal = Decimal(str(quantity))
+                if not quantity_decimal.is_finite() or quantity_decimal <= 0:
+                    raise ValueError
+            except (ValueError, ArithmeticError):
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["valid_quantity"]
+                continue
+            line = candidates[0]
+            updated = {**line, "quantity": format(quantity_decimal, ".3f"), "total_paise": money_for_quantity(quantity_decimal, line["rate_paise"])}
+            output_lines = [updated if item["line_id"] == line["line_id"] else item for item in output_lines]
+            op.update({"resolved_line_id": line["line_id"], "quantity": format(quantity_decimal, ".3f"), "status": "VERIFIED", "missing_fields": []})
+        elif op["op"] == "ADD":
+            catalogue = _catalogue_candidates(session, user, quote, op)
+            if len(catalogue) != 1:
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["verified_rate" if not catalogue else "catalogue_selection"]
+                op["options"] = [_option(entry) for entry in catalogue]
+                continue
+            quantity = op.get("quantity")
+            if not quantity:
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["quantity"]
+                continue
+            entry = catalogue[0]
+            line = {
+                "line_id": uid(),
+                "room": op.get("room") or "Unspecified room",
+                "category": entry.category,
+                "description": entry.name,
+                "sku": entry.sku,
+                "quantity": format(Decimal(str(quantity)), ".3f"),
+                "unit": entry.unit,
+                "rate_paise": entry.rate_paise,
+                "total_paise": money_for_quantity(quantity, entry.rate_paise),
+                "gst_bps": entry.gst_bps,
+            }
+            output_lines.append(line)
+            op.update({"sku": entry.sku, "resolved_line_id": line["line_id"], "status": "VERIFIED", "missing_fields": []})
+        elif op["op"] == "CLARIFY":
             op["status"] = "NEEDS_INFO"
-            op["missing_fields"] = ["catalogue_selection"]
+        else:
+            op["status"], op["missing_fields"] = "NEEDS_INFO", ["supported_operation"]
     new_total = quote_total(output_lines)
     draft = Draft(
         id=uid(),
@@ -733,9 +980,7 @@ def submit_change(
         lines=output_lines,
         total_paise=new_total,
         content_sha256=canonical_hash(output_lines),
-        status="NEEDS_CLARIFICATION"
-        if any(op["status"] == "NEEDS_INFO" for op in ops)
-        else "DRAFT_READY",
+        status="NEEDS_CLARIFICATION" if any(op["status"] == "NEEDS_INFO" for op in ops) else "DRAFT_READY",
         created_by=user.id,
     )
     session.add(draft)
@@ -778,8 +1023,6 @@ def resolve_catalogue(
     )
     if not entry:
         raise ValueError("Select a verified catalogue option")
-    if entry.unit != "sqft":
-        raise ValueError("Unit mismatch; designer confirmation is required")
     # Resolve from the original base line when the REMOVE operation already deleted it.
     base = session.scalar(
         select(QuoteVersion).where(
@@ -792,10 +1035,12 @@ def resolve_catalogue(
         (
             line
             for line in (base.lines if base else [])
-            if line["room"] == op["room"] and line["category"] == "Countertop"
+            if line["line_id"] == op.get("resolved_line_id")
         ),
         None,
     )
+    if old_line is not None and entry.unit != old_line["unit"]:
+        raise ValueError("Unit mismatch; designer confirmation is required")
     if old_line is None:
         raise ValueError("Could not resolve the original countertop line")
     draft.lines = [line for line in draft.lines if line["line_id"] != old_line["line_id"]]
@@ -831,6 +1076,138 @@ def resolve_catalogue(
     if commit:
         session.commit()
     return draft_view(draft, base.total_paise if base else 0, base.lines if base else [])
+
+
+def resolve_catalogue_text(
+    session: Session, user: User, draft_id: str, text: str, *, commit: bool = True
+) -> dict[str, Any] | None:
+    """Resolve a pending catalogue choice from natural text only when unambiguous."""
+
+    draft = session.scalar(
+        select(Draft).where(Draft.id == draft_id, Draft.firm_id == user.firm_id)
+    )
+    if draft is None or draft.status != "NEEDS_CLARIFICATION":
+        return None
+    requested = _match_tokens(text)
+    choices: list[str] = []
+    for operation in draft.ops:
+        if operation.get("status") != "NEEDS_INFO" or "catalogue_selection" not in operation.get("missing_fields", []):
+            continue
+        for option in operation.get("options", []):
+            option_tokens = _match_tokens(f"{option.get('sku', '')} {option.get('name', '')}")
+            if option_tokens & requested:
+                choices.append(str(option["sku"]))
+    choices = sorted(set(choices))
+    if len(choices) == 1:
+        return resolve_catalogue(session, user, draft_id, choices[0], commit=commit)
+    return None
+
+
+def amend_open_draft(
+    session: Session, user: User, draft_id: str, text: str, *, commit: bool = True
+) -> dict[str, Any] | None:
+    """Apply a validated correction to one open draft, never to an approved version."""
+
+    draft = session.scalar(
+        select(Draft).where(Draft.id == draft_id, Draft.firm_id == user.firm_id).with_for_update()
+    )
+    if draft is None or draft.status not in {"NEEDS_CLARIFICATION", "DRAFT_READY"}:
+        return None
+    quote = session.scalar(
+        select(Quote).where(Quote.id == draft.quote_id, Quote.firm_id == user.firm_id)
+    )
+    base = session.scalar(
+        select(QuoteVersion).where(
+            QuoteVersion.firm_id == user.firm_id,
+            QuoteVersion.quote_id == draft.quote_id,
+            QuoteVersion.number == draft.base_version,
+        )
+    )
+    if quote is None or base is None:
+        raise LookupError("Open draft base quotation not found")
+    entries = session.scalars(
+        select(RateEntry).where(
+            RateEntry.firm_id == user.firm_id,
+            RateEntry.rate_card_id == quote.rate_card_id,
+            RateEntry.verified.is_(True),
+        )
+    ).all()
+    extracted = get_change_extractor().extract(
+        text,
+        {
+            **_model_context(base, entries),
+            "pending_draft_operations": draft.ops,
+            "pending_draft_lines": draft.lines,
+        },
+    )
+    ops = _normalise_operations(extracted)
+    if not ops or all(op["op"] == "UNRELATED_MESSAGE" for op in ops):
+        return None
+    output_lines = [dict(line) for line in draft.lines]
+    amended_ops = [dict(operation) for operation in draft.ops]
+    for op in ops:
+        candidates = _line_candidates(op, output_lines)
+        if len(candidates) != 1:
+            op["status"], op["missing_fields"] = "NEEDS_INFO", ["target_line"]
+            amended_ops.append(op)
+            continue
+        line = candidates[0]
+        if op["op"] == "REMOVE":
+            output_lines.remove(line)
+            op.update({"resolved_line_id": line["line_id"], "removed_line": line, "status": "VERIFIED", "missing_fields": []})
+        elif op["op"] in {"MODIFY", "CORRECT_PREVIOUS_CHANGE"}:
+            quantity = op.get("quantity")
+            if not quantity and op.get("width_ft") and op.get("height_ft"):
+                quantity = str((Decimal(op["width_ft"]) * Decimal(op["height_ft"])).quantize(Decimal("0.001")))
+            if not quantity:
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["quantity_or_dimensions"]
+                amended_ops.append(op)
+                continue
+            try:
+                decimal_quantity = Decimal(str(quantity))
+                if not decimal_quantity.is_finite() or decimal_quantity <= 0:
+                    raise ValueError
+            except (ArithmeticError, ValueError):
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["valid_quantity"]
+                amended_ops.append(op)
+                continue
+            updated = {**line, "quantity": format(decimal_quantity, ".3f"), "total_paise": money_for_quantity(decimal_quantity, line["rate_paise"])}
+            output_lines = [updated if item["line_id"] == line["line_id"] else item for item in output_lines]
+            op.update({"resolved_line_id": line["line_id"], "quantity": format(decimal_quantity, ".3f"), "status": "VERIFIED", "missing_fields": []})
+        elif op["op"] == "REPLACE":
+            catalogue = _catalogue_candidates(session, user, quote, op)
+            if len(catalogue) != 1:
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["catalogue_selection" if catalogue else "verified_rate"]
+                op["options"] = [_option(entry) for entry in catalogue]
+                amended_ops.append(op)
+                continue
+            entry = catalogue[0]
+            if entry.unit != line["unit"]:
+                op["status"], op["missing_fields"] = "NEEDS_INFO", ["unit_match"]
+                amended_ops.append(op)
+                continue
+            updated = {**line, "description": entry.name, "sku": entry.sku, "rate_paise": entry.rate_paise, "total_paise": money_for_quantity(line["quantity"], entry.rate_paise), "gst_bps": entry.gst_bps}
+            output_lines = [updated if item["line_id"] == line["line_id"] else item for item in output_lines]
+            op.update({"resolved_line_id": line["line_id"], "sku": entry.sku, "selected_name": entry.name, "status": "VERIFIED", "missing_fields": []})
+        else:
+            op["status"], op["missing_fields"] = "NEEDS_INFO", ["supported_operation"]
+        replaced = False
+        for index, previous in enumerate(amended_ops):
+            if previous.get("resolved_line_id") == op.get("resolved_line_id") and op.get("resolved_line_id"):
+                amended_ops[index] = op
+                replaced = True
+                break
+        if not replaced:
+            amended_ops.append(op)
+    draft.lines = output_lines
+    draft.ops = amended_ops
+    draft.total_paise = quote_total(output_lines)
+    draft.content_sha256 = canonical_hash(output_lines)
+    draft.status = "NEEDS_CLARIFICATION" if any(operation.get("status") == "NEEDS_INFO" for operation in amended_ops) else "DRAFT_READY"
+    audit(session, user.firm_id, user.id, "DRAFT_AMENDED", draft.id, text[:200])
+    if commit:
+        session.commit()
+    return draft_view(draft, base.total_paise, base.lines)
 
 
 def draft_view(
