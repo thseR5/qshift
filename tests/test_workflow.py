@@ -164,6 +164,31 @@ def test_provider_proposal_modifies_quantity_without_pricing_authority(session, 
     assert kitchen["rate_paise"] == 65000
 
 
+def test_provider_hallucinated_target_is_held_for_source_review(session, monkeypatch):
+    seed_demo(session)
+    designer, _ = users(session)
+    assert designer
+
+    class Provider:
+        def extract(self, _text, _context):
+            return ChangeExtraction(
+                intent="REMOVE",
+                operations=[
+                    ChangeOp(
+                        op="REMOVE",
+                        target_text="guest-ceiling",
+                        confidence=0.99,
+                        status="PROPOSED",
+                    )
+                ],
+            )
+
+    monkeypatch.setattr("qshift.services.get_change_extractor", lambda: Provider())
+    draft = submit_change(session, designer, "project-sharma", "remove the kitchen countertop")
+    assert draft["status"] == "NEEDS_CLARIFICATION"
+    assert draft["ops"][0]["missing_fields"] == ["source_evidence"]
+
+
 def test_open_draft_correction_changes_only_target_line(session, monkeypatch):
     seed_demo(session)
     designer, _ = users(session)

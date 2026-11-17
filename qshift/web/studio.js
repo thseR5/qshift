@@ -156,7 +156,14 @@ el('confirm-quotation-import').onclick = run(async () => {
   const response = await fetch('/api/imports/quotation?project_id=' + encodeURIComponent(el('project-picker').value), {method: 'POST', headers: headers(), body: form});
   const result = await response.json();
   if (!response.ok) throw new Error(result.detail || 'Quotation import could not be completed.');
-  el('quotation-import-result').textContent = result.valid_rows + ' quotation rows imported into the selected project.';
+  const unmatched = (result.unmatched_items || []).map(item => {
+    const choices = (item.suggestions || []).map(option => option.sku + ' · ' + option.name).join(', ');
+    return `Row ${item.row} (${item.sku || 'no SKU'}): ${item.reason}${choices ? ' — suggestions: ' + choices : ''}`;
+  });
+  el('quotation-import-result').textContent = [
+    result.valid_rows + ' quotation rows imported into the selected project.',
+    unmatched.length ? 'Unmatched-item review: ' + unmatched.join(' | ') : 'No unmatched items.',
+  ].join(' ');
   el('quotation-mapping-panel').hidden = true;
   pendingQuotationImport = null;
   await refreshStudio();

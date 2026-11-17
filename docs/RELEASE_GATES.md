@@ -10,7 +10,7 @@ Status: **SUBSTANTIALLY PRESENT**. The current run has 52 passing tests and dete
 
 Required: truthful fictional-data workflow, real local model versus mock clearly labeled, no fabricated customer results, support contact and failure fallback.
 
-Status: **PREPARABLE / NOT FORMALLY SIGNED OFF**. The public entry point and local Ollama revision adapter are present, but live-model evidence is blocked until a local model is available.
+Status: **NOT PASSED**. The local Ollama adapter is real and measured, but qwen3:1.7b scored operation F1 0.030 on 55 cases and 0.000 on the held-out ten. It is suitable for failure analysis only, not a real-firm pilot.
 
 ## Gate C — founder-operated real-firm pilot
 

@@ -162,3 +162,78 @@ Real vs mock status
 Known limitations
 Next safe action
 ```
+
+## 2026-11-17 — V6.3 local real-model activation
+
+The founder-authorized local-only runtime evaluation was completed on this Mac. No paid
+provider, public infrastructure, live WhatsApp send or customer data was used.
+
+Environment checks:
+
+```text
+architecture: arm64
+macOS: 26.6.2
+RAM: 8.0 GB
+free storage: 143 GiB
+Homebrew: /opt/homebrew/bin/brew, 7.0.11
+```
+
+Commands and results:
+
+```text
+brew install ollama
+Ollama 0.40.16 installed successfully
+
+brew services start ollama
+curl http://127.0.0.1:11434/api/tags
+{"models":[]}
+
+ollama pull qwen3:1.7b
+success; qwen3:1.7b, 1.4 GB, Q4_K_M, model id 8f68893c685c
+
+curl http://127.0.0.1:11434/api/tags
+qwen3:1.7b present; inference probe succeeded
+```
+
+Implementation changes:
+
+- The Ollama adapter now exposes a small model-only schema. Internal fields such as resolved
+  line IDs, catalogue options, prices, totals, status and approval state are not in the model
+  schema and are never trusted from the response.
+- Raw model JSON and raw response text are saved by the live evaluator; normalized proposals
+  remain separate from the evidence record.
+- The evaluator supports a held-out slice and reports operation and clarification metrics.
+- Quotation import now returns deterministic `unmatched_items` review records with candidate
+  verified SKUs; Studio displays those records after import.
+
+Verification:
+
+```text
+make test
+53 passed, 1 warning; engine/approval coverage 94%
+
+make lint
+Ruff passed; configured engine/approval mypy passed
+
+full mypy comparison
+219 errors on V6.3 working tree; 219 errors on git baseline b7b59ec
+=> no newly introduced full-check errors detected; release-critical configured gates remain green
+```
+
+The exact live evaluation evidence is in `work/revision_eval_live_v63.jsonl` and the held-out
+slice is in `work/revision_eval_live_v63_heldout.jsonl` (both ignored from git).
+
+Real FastAPI endpoint checks with `QSHIFT_CHANGE_MODEL_PROVIDER=ollama` used separate SQLite
+files and only seeded fictional Demo Interiors data:
+
+- Bedroom false-ceiling removal: `DRAFT_READY`; deterministic line resolution verified the
+  removal, authorized approver committed version 2 at ₹2,18,000, and the authenticated PDF
+  endpoint returned HTTP 200 with an 11,507-byte PDF.
+- Kitchen quartz replacement plus ceiling removal: `NEEDS_CLARIFICATION`; the model proposed
+  the correct broad pair but deterministic catalogue matching found two verified quartz rates,
+  so no approval was possible until a designer selects one.
+- Romanized Telugu correction request: `NEEDS_CLARIFICATION`; the model produced a MODIFY draft
+  without a valid quantity/dimension, so no quotation version or PDF was issued.
+
+The second and third outcomes demonstrate the safety boundary: uncertain real-model proposals
+remain drafts and cannot create approved documents.

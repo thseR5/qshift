@@ -89,6 +89,56 @@ class ChangeExtraction(BaseModel):
     notes: list[str] = Field(default_factory=list, max_length=10)
 
 
+class ModelChangeOperation(BaseModel):
+    """Small output contract exposed to the local model; no service mutation fields."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    op: Literal[
+        "ADD",
+        "REMOVE",
+        "REPLACE",
+        "MODIFY",
+        "CANCEL",
+        "CORRECT_PREVIOUS_CHANGE",
+        "CLARIFICATION_REPLY",
+        "SELECT_PROJECT",
+        "PROJECT_STATUS",
+        "UNRELATED_MESSAGE",
+    ]
+    room: str | None = None
+    target_text: str
+    source_span: str | None = None
+    replacement_text: str | None = None
+    quantity: str | None = None
+    unit: str | None = None
+    width_ft: str | None = None
+    height_ft: str | None = None
+    target_line_id: str | None = None
+    confidence: float = Field(ge=0, le=1)
+    missing_fields: list[str] = Field(default_factory=list, max_length=10)
+
+
+class ModelChangeExtraction(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    intent: Literal[
+        "ADD",
+        "REMOVE",
+        "REPLACE",
+        "MODIFY",
+        "CANCEL",
+        "CORRECT_PREVIOUS_CHANGE",
+        "CLARIFICATION_REPLY",
+        "SELECT_PROJECT",
+        "PROJECT_STATUS",
+        "UNRELATED_MESSAGE",
+    ]
+    operations: list[ModelChangeOperation] = Field(default_factory=list, max_length=20)
+    clarification: str | None = Field(default=None, max_length=500)
+    notes: list[str] = Field(default_factory=list, max_length=10)
+
+
 class ChangeExtractor(Protocol):
     """Provider-independent contract for untrusted change proposals."""
 
@@ -112,7 +162,20 @@ stated, replacement_text for replacement, quantity/unit when explicitly stated, 
 missing_fields list when clarification is required. If a room, item, target quotation line,
 measurement or material is ambiguous, do not guess: mark the missing field. A reply to the
 last clarification should be CLARIFICATION_REPLY and should preserve the answer verbatim.
-Do not output prices, totals, tax, approval state, or fabricated evidence.
+For MODIFY, use MODIFY (never ADD) and put explicit dimensions in width_ft/height_ft or an
+explicit quantity in quantity. For REMOVE, use REMOVE. For material changes, use REPLACE
+with replacement_text. Use target_line_id only when it is an exact line_id from context.
+Grounding context is reference-only: never emit an operation merely because a quotation
+line appears there, and never emit an operation for every room or line. Every operation
+must be supported by words in the user message. For a message such as "replace the granite
+countertop with quartz", emit one REPLACE operation with target_text "granite countertop"
+and replacement_text "quartz"; the words after "with" or "to" are the replacement.
+For "remove the false ceiling", emit one REMOVE operation with target_text "false ceiling".
+If an existing quotation line supplies quantity and unit, do not ask for them again. If the
+target is unclear, emit one operation with missing_fields rather than guessing or copying
+unrelated context values.
+Do not output resolved_line_id, options, removed_line, selected_name, rate, totals, tax,
+approval state, or fabricated evidence.
 """.strip()
 
 
@@ -128,9 +191,13 @@ class OllamaChangeLLM:
             "QSHIFT_OLLAMA_URL", "http://127.0.0.1:11434/api/chat"
         )
         self.model = model if model is not None else _ollama_model()
+        self.last_raw: dict[str, Any] | None = None
+        self.last_raw_text: str | None = None
 
     def extract(self, text: str, context: dict[str, Any] | None = None) -> ChangeExtraction:
-        schema = ChangeExtraction.model_json_schema()
+        self.last_raw = None
+        self.last_raw_text = None
+        schema = ModelChangeExtraction.model_json_schema()
         payload = {
             "model": self.model,
             "stream": False,
@@ -163,7 +230,28 @@ class OllamaChangeLLM:
             with build_opener(ProxyHandler({})).open(request, timeout=timeout) as response:
                 body = json.load(response)
             content = body["message"]["content"]
-            return ChangeExtraction.model_validate_json(content)
+            self.last_raw_text = content
+            self.last_raw = json.loads(content)
+            # Accept legacy/mock responses that include the internal status field while
+            # keeping that field out of the model-facing schema and never trusting it.
+            validation_payload = dict(self.last_raw)
+            validation_payload["operations"] = [
+                {key: value for key, value in operation.items() if key != "status"}
+                for operation in validation_payload.get("operations", [])
+            ]
+            model_result = ModelChangeExtraction.model_validate(validation_payload)
+            return ChangeExtraction(
+                intent=model_result.intent,
+                operations=[
+                    ChangeOp(
+                        **operation.model_dump(mode="json"),
+                        status="PROPOSED",
+                    )
+                    for operation in model_result.operations
+                ],
+                clarification=model_result.clarification,
+                notes=model_result.notes,
+            )
         except HTTPError as exc:
             raise LocalModelUnavailable(
                 f"Ollama returned HTTP {exc.code}; check QSHIFT_CHANGE_MODEL={self.model!r}."

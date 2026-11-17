@@ -26,6 +26,7 @@ from sqlalchemy.orm import Session
 from qshift.agent.extraction import (
     ChangeExtraction,
     ChangeOp,
+    MockLLM,
     get_change_extractor,
 )
 from qshift.agent.local_model import LocalModelUnavailable
@@ -613,18 +614,19 @@ def import_quotation(
         raise ValueError("Import a rate card before importing a quotation")
     rows, mapping, _ = _read_tabular(filename, content, QUOTE_HEADER_ALIASES, mapping_override)
     errors: list[str] = []
+    unmatched_items: list[dict[str, Any]] = []
     lines: list[dict[str, Any]] = []
+    verified_entries = session.scalars(
+        select(RateEntry).where(
+            RateEntry.firm_id == user.firm_id,
+            RateEntry.rate_card_id == card.id,
+            RateEntry.verified.is_(True),
+        )
+    ).all()
     for row_num, raw in enumerate(rows, start=2):
         row = {str(k).strip().lower(): v for k, v in raw.items()}
         sku = str(row.get("sku", "")).strip()
-        entry = session.scalar(
-            select(RateEntry).where(
-                RateEntry.firm_id == user.firm_id,
-                RateEntry.rate_card_id == card.id,
-                RateEntry.sku == sku,
-                RateEntry.verified.is_(True),
-            )
-        )
+        entry = next((candidate for candidate in verified_entries if candidate.sku == sku), None)
         try:
             quantity = Decimal(str(row.get("quantity", "")))
             if (
@@ -636,6 +638,33 @@ def import_quotation(
             ):
                 raise ValueError
         except Exception:
+            reason = (
+                "unknown_or_unverified_sku"
+                if entry is None
+                else "missing_or_invalid_room_or_quantity"
+            )
+            requested = _match_tokens(" ".join(str(row.get(key, "")) for key in ("sku", "name", "description", "category")))
+            ranked = []
+            for candidate in verified_entries:
+                searchable = _match_tokens(" ".join([candidate.sku, candidate.name, candidate.category, *(candidate.aliases or [])]))
+                overlap = len(requested & searchable)
+                if overlap:
+                    ranked.append((candidate, overlap))
+            highest = max((score for _, score in ranked), default=0)
+            suggestions = [
+                {"sku": candidate.sku, "name": candidate.name, "unit": candidate.unit}
+                for candidate, score in ranked
+                if score == highest and highest > 0
+            ][:5]
+            unmatched_items.append(
+                {
+                    "row": row_num,
+                    "sku": sku,
+                    "room": str(row.get("room", "")).strip(),
+                    "reason": reason,
+                    "suggestions": suggestions,
+                }
+            )
             errors.append(f"Row {row_num}: missing room, quantity, or verified SKU {sku!r}")
             continue
         lines.append(
@@ -688,6 +717,7 @@ def import_quotation(
         "version": 1,
         "valid_rows": len(lines),
         "errors": errors,
+        "unmatched_items": unmatched_items,
         "mapping": mapping,
         "total_paise": version.total_paise,
         "total": format_inr(version.total_paise),
@@ -758,6 +788,19 @@ def _catalogue_candidates(
         return []
     highest = max(score for _, score in ranked)
     return [entry for entry, score in ranked if score == highest]
+
+
+def _source_evidence_error(op: dict[str, Any], message: str) -> str | None:
+    """Reject model proposals whose target is not evidenced by the user message."""
+
+    source_span = str(op.get("source_span") or "").strip()
+    if source_span and source_span.casefold() not in message.casefold():
+        return "source_evidence"
+    target_tokens = _match_tokens(op.get("target_text"))
+    message_tokens = _match_tokens(message)
+    if target_tokens and not target_tokens.intersection(message_tokens) and not op.get("target_line_id"):
+        return "source_evidence"
+    return None
 
 
 def _option(entry: RateEntry) -> dict[str, Any]:
@@ -902,6 +945,10 @@ def submit_change(
         if op["op"] in {"UNRELATED_MESSAGE", "SELECT_PROJECT", "PROJECT_STATUS"}:
             op["status"], op["missing_fields"] = "NEEDS_INFO", ["scope"]
             continue
+        evidence_error = None if isinstance(extractor, MockLLM) else _source_evidence_error(op, text)
+        if evidence_error:
+            op["status"], op["missing_fields"] = "NEEDS_INFO", [evidence_error]
+            continue
         if op["op"] == "CANCEL":
             op["status"] = "CANCELLED"
             continue
@@ -918,7 +965,7 @@ def submit_change(
             output_lines.remove(removed)
             op["resolved_line_id"] = removed["line_id"]
             op["removed_line"] = removed
-            op["status"] = "VERIFIED"
+            op["status"], op["missing_fields"] = "VERIFIED", []
         elif op["op"] == "REPLACE":
             source_candidates = _line_candidates(op, base.lines)
             catalogue = _catalogue_candidates(session, user, quote, op)

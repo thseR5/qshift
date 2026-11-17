@@ -112,3 +112,27 @@ def test_import_accepts_explicit_mapping_override(session):
     assert result["accepted"] == 1
     entry = session.scalar(select(RateEntry).where(RateEntry.sku == "NEW-4"))
     assert entry and entry.name == "Custom quartz" and entry.rate_paise == 71000
+
+
+def test_quotation_import_returns_unmatched_item_review(session):
+    seed_demo(session)
+    owner = session.scalar(select(User).where(User.id == "user-owner"))
+    assert owner
+    project = create_project(session, owner, "Review Loft", "Fictional client")
+    result = import_quotation(
+        session,
+        owner,
+        project["id"],
+        "quote.csv",
+        b"room,sku,quantity\nKitchen,COUNTER-GRANITE,40\nKitchen,NOT-IN-RATE-CARD,10\n",
+    )
+    assert result["valid_rows"] == 1
+    assert result["unmatched_items"] == [
+        {
+            "row": 3,
+            "sku": "NOT-IN-RATE-CARD",
+            "room": "Kitchen",
+            "reason": "unknown_or_unverified_sku",
+            "suggestions": [],
+        }
+    ]
