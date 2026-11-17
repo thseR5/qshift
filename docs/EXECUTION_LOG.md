@@ -281,4 +281,7 @@ exit code 2 before invoking `sbatch`.
   The account checklist was run; AWS CLI is not installed in this workspace, so no account or
   credit facts were inferred and no AWS resource was created.
 - Verification: `make test` — 58 passed, 1 warning. `make lint` — Ruff and configured mypy passed.
+- Direct fictional revision smoke flow (enrolled APPROVER -> `review` -> one-time
+  `approve <token>` -> pending PDF worker) returned `pdf_state=accepted`, generated 11,572 PDF
+  bytes, and verified the `%PDF-` header. No network sender was used.
 
