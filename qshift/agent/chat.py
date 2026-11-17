@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from qshift.engine.pricing import format_inr
 from qshift.models import Draft, QuoteVersion, User
 from qshift.services import (
+    cancel_draft,
     draft_view,
     pin_project,
     project_memory,
@@ -22,7 +23,7 @@ HELP = (
     "Send projects to see your projects, then use <project ID> to select one. "
     "Describe a quotation change in your own words. "
     "Send status for the open draft, choose <SKU> to answer a catalogue question, "
-    "history for approved quotations, or changes for recent requests."
+    "history for approved quotations, changes for recent requests, or cancel to discard an open draft."
 )
 OPEN_DRAFT_STATUSES = ("NEEDS_CLARIFICATION", "DRAFT_READY")
 
@@ -89,6 +90,12 @@ def respond_to_message(
         return {"reply": "Select a project first. Send projects to find its ID."}
 
     project = require_project(session, user, project_id)
+    if not argument and command in {"cancel", "discard", "stop"}:
+        try:
+            cancel_draft(session, user, project.id, draft_id, commit=commit)
+        except LookupError:
+            return {"reply": f"There is no open draft to cancel for {project.name}."}
+        return {"reply": f"Cancelled the open draft for {project.name}. The approved quote is unchanged."}
     if not argument and command == "history":
         revisions = versions(session, user, project.id)
         lines = [f"v{row['version']} · {row['total']}" for row in revisions[-5:]]

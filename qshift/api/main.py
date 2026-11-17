@@ -37,6 +37,7 @@ from qshift.services import (
     import_rate_card,
     issue_approval_token,
     pin_project,
+    preview_import,
     project_memory,
     projects_for_user,
     reject_draft,
@@ -581,6 +582,17 @@ def rate_card_import(
         raise HTTPException(422, str(exc)) from exc
 
 
+@app.post("/api/imports/rate-card/preview")
+def rate_card_preview(
+    session: SessionDep, user: UserDep, file: Annotated[UploadFile, File()]
+) -> dict:
+    del session, user
+    try:
+        return preview_import(file.filename or "upload", file.file.read(), "rate_card")
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
 @app.post("/api/imports/quotation")
 def quotation_import(
     project_id: str,
@@ -594,6 +606,17 @@ def quotation_import(
         )
     except LookupError as exc:
         raise HTTPException(404, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@app.post("/api/imports/quotation/preview")
+def quotation_preview(
+    session: SessionDep, user: UserDep, file: Annotated[UploadFile, File()]
+) -> dict:
+    del session, user
+    try:
+        return preview_import(file.filename or "upload", file.file.read(), "quotation")
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
 

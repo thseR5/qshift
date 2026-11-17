@@ -34,7 +34,7 @@ class ChangeOp(BaseModel):
     quantity: str | None = None
     unit: str | None = None
     confidence: float = Field(ge=0, le=1)
-    status: Literal["PROPOSED", "NEEDS_INFO", "VERIFIED", "REJECTED", "APPLIED"]
+    status: Literal["PROPOSED", "NEEDS_INFO", "VERIFIED", "REJECTED", "CANCELLED", "APPLIED"]
     missing_fields: list[str] = Field(default_factory=list)
     resolved_line_id: str | None = None
     options: list[dict[str, Any]] = Field(default_factory=list)

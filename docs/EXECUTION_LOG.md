@@ -44,6 +44,28 @@ Evidence: `docs/QSHIFT_FOUNDER_AUDIT.md`.
 
 No DNS, registrar, hosting, payment, Meta, email or customer-data action was performed. Official Meta policy was checked for the audit. The current policy requires recipient opt-in, opt-out handling, approved templates for business-initiated messages outside the 24-hour window, clear human escalation and privacy/data controls.
 
+## 2026-11-17 — import usability and cancellation slice
+
+Changed:
+
+- `qshift/services.py` now normalizes safe CSV/XLSX header aliases, supports explicit GST percentage conversion to basis points, and exposes read-only `preview_import` output. Preview does not write the database.
+- `qshift/api/main.py` adds authenticated `/api/imports/rate-card/preview` and `/api/imports/quotation/preview` endpoints.
+- `qshift/services.py`, `qshift/agent/chat.py` and `qshift/intake.py` support explicit cancellation of open drafts without changing the last approved quote version.
+- Added regression tests for alias mapping, GST conversion, preview no-write behavior, service cancellation and API cancellation.
+
+Verification:
+
+```text
+make test
+44 passed, 1 warning in 5.64s
+
+make lint
+Ruff passed
+mypy qshift/engine qshift/approval passed
+```
+
+Status: local fictional/test data only. The mapping is deterministic and intentionally does not use fuzzy matching or auto-verify any rate.
+
 ## Next entry format
 
 ```text

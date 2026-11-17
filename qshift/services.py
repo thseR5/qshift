@@ -7,6 +7,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import uuid
 from datetime import UTC, timedelta
 from decimal import ROUND_HALF_UP, Decimal
@@ -49,6 +50,52 @@ from qshift.models import (
 )
 
 APPROVAL_SECRET = os.getenv("QSHIFT_APPROVAL_SECRET", "local-demo-only-change-me").encode()
+
+RATE_HEADER_ALIASES = {
+    "sku": "sku",
+    "item_code": "sku",
+    "item_number": "sku",
+    "code": "sku",
+    "product_code": "sku",
+    "material_code": "sku",
+    "name": "name",
+    "item": "name",
+    "item_name": "name",
+    "description": "name",
+    "particulars": "name",
+    "product": "name",
+    "category": "category",
+    "group": "category",
+    "type": "category",
+    "unit": "unit",
+    "uom": "unit",
+    "unit_of_measure": "unit",
+    "rate_paise": "rate_paise",
+    "rate": "rate_paise",
+    "unit_rate": "rate_paise",
+    "unit_price": "rate_paise",
+    "price": "rate_paise",
+    "gst_bps": "gst_bps",
+    "gst_basis_points": "gst_bps",
+    "gst": "gst_percent",
+    "gst_percent": "gst_percent",
+    "gst_percentage": "gst_percent",
+}
+QUOTE_HEADER_ALIASES = {
+    "room": "room",
+    "room_name": "room",
+    "space": "room",
+    "area": "room",
+    "sku": "sku",
+    "item_code": "sku",
+    "item_number": "sku",
+    "code": "sku",
+    "product_code": "sku",
+    "quantity": "quantity",
+    "qty": "quantity",
+    "count": "quantity",
+    "volume": "quantity",
+}
 
 
 def uid() -> str:
@@ -330,21 +377,78 @@ def create_project(session: Session, user: User, name: str, client_label: str) -
     return {"id": project.id, "name": project.name}
 
 
-def import_rate_card(session: Session, user: User, filename: str, content: bytes) -> dict[str, Any]:
-    rows: list[dict[str, Any]] = []
+def _header_key(value: object) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", str(value).strip().casefold()).strip("_")
+
+
+def _read_tabular(
+    filename: str, content: bytes, aliases: dict[str, str]
+) -> tuple[list[dict[str, Any]], dict[str, str], list[str]]:
+    """Read a spreadsheet without executing formulas or changing persisted state."""
+    raw_rows: list[dict[str, Any]]
+    raw_headers: list[str]
     if filename.lower().endswith(".csv"):
-        rows = list(csv.DictReader(io.StringIO(content.decode("utf-8-sig"))))
+        reader = csv.DictReader(io.StringIO(content.decode("utf-8-sig")))
+        raw_headers = [str(header or "") for header in (reader.fieldnames or [])]
+        raw_rows = [dict(row) for row in reader]
     elif filename.lower().endswith((".xlsx", ".xlsm")):
-        ws = load_workbook(io.BytesIO(content), read_only=True, data_only=True).active
-        iterator = ws.iter_rows(values_only=True)
-        headers = [str(h).strip().lower() for h in next(iterator, ()) if h is not None]
-        rows = [
-            dict(zip(headers, row, strict=False))
+        workbook = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
+        worksheet = workbook.active
+        iterator = worksheet.iter_rows(values_only=True)
+        raw_headers = [str(header).strip() for header in next(iterator, ()) if header is not None]
+        raw_rows = [
+            dict(zip(raw_headers, row, strict=False))
             for row in iterator
-            if any(v is not None for v in row)
+            if any(value is not None for value in row)
         ]
     else:
-        raise ValueError("Only CSV and XLSX imports are supported")
+        raise ValueError("Only CSV and XLSX are supported")
+
+    mapping: dict[str, str] = {}
+    rows: list[dict[str, Any]] = []
+    for raw in raw_rows:
+        normalized: dict[str, Any] = {}
+        for key, value in raw.items():
+            canonical = aliases.get(_header_key(key), _header_key(key))
+            if canonical in aliases.values() and canonical not in mapping:
+                mapping[canonical] = str(key)
+            normalized[canonical] = value
+        rows.append(normalized)
+    return rows, mapping, raw_headers
+
+
+def preview_import(filename: str, content: bytes, kind: str) -> dict[str, Any]:
+    aliases = RATE_HEADER_ALIASES if kind == "rate_card" else QUOTE_HEADER_ALIASES
+    required = ["sku", "unit", "rate_paise"] if kind == "rate_card" else [
+        "room", "sku", "quantity"
+    ]
+    rows, mapping, headers = _read_tabular(filename, content, aliases)
+    return {
+        "kind": kind,
+        "format": "csv" if filename.lower().endswith(".csv") else "xlsx",
+        "headers": headers,
+        "mapping": mapping,
+        "missing_required": [field for field in required if field not in mapping],
+        "row_count": len(rows),
+        "sample_rows": rows[:5],
+        "writes_database": False,
+    }
+
+
+def _gst_bps(row: dict[str, Any]) -> int:
+    if str(row.get("gst_percent", "")).strip():
+        percentage = Decimal(str(row["gst_percent"]).strip())
+        if not percentage.is_finite() or percentage < 0 or percentage > 100:
+            raise ValueError
+        basis_points = percentage * Decimal(100)
+        if basis_points != basis_points.to_integral_value():
+            raise ValueError
+        return int(basis_points)
+    return int(row.get("gst_bps", 0) or 0)
+
+
+def import_rate_card(session: Session, user: User, filename: str, content: bytes) -> dict[str, Any]:
+    rows, mapping, _ = _read_tabular(filename, content, RATE_HEADER_ALIASES)
     errors: list[str] = []
     warnings: list[str] = []
     candidate_rates = sorted(
@@ -381,7 +485,7 @@ def import_rate_card(session: Session, user: User, filename: str, content: bytes
             rate = int(price)
             if not sku or unit not in {"sqft", "rft", "sqm", "nos", "lumpsum"} or rate <= 0:
                 raise ValueError
-            gst_bps = int(row.get("gst_bps", 0) or 0)
+            gst_bps = _gst_bps(row)
             if gst_bps < 0:
                 raise ValueError
             if sku in seen:
@@ -421,6 +525,7 @@ def import_rate_card(session: Session, user: User, filename: str, content: bytes
         "unverified": accepted,
         "errors": errors,
         "warnings": warnings,
+        "mapping": mapping,
         "entries": imported_entries,
     }
 
@@ -458,20 +563,7 @@ def import_quotation(
     )
     if card is None:
         raise ValueError("Import a rate card before importing a quotation")
-    rows: list[dict[str, Any]] = []
-    if filename.lower().endswith(".csv"):
-        rows = list(csv.DictReader(io.StringIO(content.decode("utf-8-sig"))))
-    elif filename.lower().endswith((".xlsx", ".xlsm")):
-        ws = load_workbook(io.BytesIO(content), read_only=True, data_only=True).active
-        iterator = ws.iter_rows(values_only=True)
-        headers = [str(h).strip().lower() for h in next(iterator, ()) if h is not None]
-        rows = [
-            dict(zip(headers, row, strict=False))
-            for row in iterator
-            if any(v is not None for v in row)
-        ]
-    else:
-        raise ValueError("Only CSV and XLSX imports are supported")
+    rows, mapping, _ = _read_tabular(filename, content, QUOTE_HEADER_ALIASES)
     errors: list[str] = []
     lines: list[dict[str, Any]] = []
     for row_num, raw in enumerate(rows, start=2):
@@ -548,6 +640,7 @@ def import_quotation(
         "version": 1,
         "valid_rows": len(lines),
         "errors": errors,
+        "mapping": mapping,
         "total_paise": version.total_paise,
         "total": format_inr(version.total_paise),
     }
@@ -830,6 +923,34 @@ def reject_draft(session: Session, user: User, draft_id: str) -> dict[str, str]:
     draft.ops = [{**op, "status": "REJECTED"} for op in draft.ops]
     audit(session, user.firm_id, user.id, "REVISION_REJECTED", draft.id)
     session.commit()
+    return {"draft_id": draft.id, "status": draft.status}
+
+
+def cancel_draft(
+    session: Session,
+    user: User,
+    project_id: str,
+    draft_id: str | None = None,
+    *,
+    commit: bool = True,
+) -> dict[str, str]:
+    """Cancel one open draft without changing the approved quote version."""
+    require_project(session, user, project_id)
+    query = select(Draft).where(
+        Draft.firm_id == user.firm_id,
+        Draft.project_id == project_id,
+        Draft.status.in_(["NEEDS_CLARIFICATION", "DRAFT_READY"]),
+    )
+    if draft_id is not None:
+        query = query.where(Draft.id == draft_id)
+    draft = session.scalar(query)
+    if draft is None:
+        raise LookupError("There is no open draft to cancel for this project")
+    draft.status = "CANCELLED"
+    draft.ops = [{**op, "status": "CANCELLED"} for op in draft.ops]
+    audit(session, user.firm_id, user.id, "DRAFT_CANCELLED", draft.id)
+    if commit:
+        session.commit()
     return {"draft_id": draft.id, "status": draft.status}
 
 

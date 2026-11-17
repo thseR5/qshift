@@ -87,9 +87,9 @@ The synthetic set contains 180 labeled messages across English, Hindi, Telugu an
 
 ## Imports
 
-Rate-card CSV/XLSX columns: `sku,name,category,unit,rate_paise,gst_bps`. Imported rows start unverified. An OWNER or APPROVER must verify rates before the catalogue can use them.
+Rate-card CSV/XLSX imports accept the canonical columns `sku,name,category,unit,rate_paise,gst_bps` plus safe aliases such as `Item Code`, `Description`, `UOM`, `Unit Price` and `GST %`. Use `POST /api/imports/rate-card/preview` to inspect the detected mapping without writing the database. Imported rows start unverified. An OWNER or APPROVER must verify rates before the catalogue can use them.
 
-Quotation CSV/XLSX columns: `room,sku,quantity`. Only SKUs already verified for the firm are accepted. PDF and photo extraction is intentionally unsupported.
+Quotation CSV/XLSX imports accept `room,sku,quantity` plus safe aliases such as `Room Name`, `Item Code`, `Qty` and `Space`. Use `POST /api/imports/quotation/preview` for a read-only mapping preview. Only SKUs already verified for the firm are accepted. PDF and photo extraction is intentionally unsupported.
 
 Blank CSV and XLSX templates are in `qshift/fixtures/templates/`.
 
@@ -127,6 +127,8 @@ follow [the ₹0 WhatsApp setup](docs/WHATSAPP_TEST.md).
 ## Security and limitations
 
 The service layer scopes lookups by `firm_id`; approval requires a server-issued token tied to the exact draft content, approver, expiry and base version. Replay, cross-approver use and stale revisions are rejected. This is not production authentication: it has seeded demo bearer tokens, no MFA, no session lifecycle, no encrypted storage, and no production deployment hardening. Run locally with fictional content only.
+
+An open revision can be safely cancelled with `cancel`, `discard` or `stop` after the project is selected. Cancellation marks only the draft as cancelled and leaves the last approved quote version unchanged.
 
 The WhatsApp pilot adapter is disabled by default and has been tested locally with a simulated Meta connection. LLM and transcription run from offline fixtures. See `docs/HOSTING.md` for the containerized PostgreSQL setup and `docs/RISKS.md` for the remaining customer launch work.
 

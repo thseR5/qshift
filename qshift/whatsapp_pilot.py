@@ -91,6 +91,8 @@ def capture_reply(session: Session, user: User, conversation: Conversation, mess
         conversation.draft_id = None
     if "draft" in result:
         conversation.draft_id = result["draft"]["id"]
+    if result.get("reply", "").startswith("Cancelled the open draft"):
+        conversation.draft_id = None
     return result["reply"]
 
 

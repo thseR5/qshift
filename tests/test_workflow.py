@@ -6,6 +6,7 @@ from sqlalchemy import select
 from qshift.models import Firm, Project, QuoteVersion, RateEntry, User
 from qshift.services import (
     approve_draft,
+    cancel_draft,
     issue_approval_token,
     pin_project,
     project_memory,
@@ -81,6 +82,19 @@ def test_designer_can_reject_and_history_marks_scope_rejected(session):
     assert memory["rejected"] == 1
     with pytest.raises(ValueError, match="open draft"):
         reject_draft(session, designer, draft["id"])
+
+
+def test_open_draft_can_be_cancelled_without_changing_approved_version(session):
+    seed_demo(session)
+    designer, _ = users(session)
+    assert designer
+    draft = submit_change(
+        session, designer, "project-sharma", "Please remove the bedroom false ceiling"
+    )
+    result = cancel_draft(session, designer, "project-sharma", draft["id"])
+    assert result["status"] == "CANCELLED"
+    quote = session.scalar(select(QuoteVersion).where(QuoteVersion.number == 1))
+    assert quote and quote.total_paise == 22_820_000
 
 
 def test_rate_snapshot_is_rechecked_at_approval(session):

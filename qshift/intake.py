@@ -44,6 +44,7 @@ ITEM_QUESTIONS = {
     "ceiling_area": "What is the gypsum ceiling area in square feet?",
     "unsupported_scope": "Some requested work needs designer review before I can price it.",
 }
+CANCEL_WORDS = {"cancel", "discard", "stop", "never mind", "nevermind"}
 
 
 def start_sample(
@@ -192,11 +193,31 @@ def add_client_message(
     bound = chat_for_project(session, user, project_id)
     if bound is not None and (chat is None or chat.id != bound.id):
         raise ValueError("Send messages for this chat through the simulated webhook.")
+    clean_text = text.strip()
+    if clean_text.casefold() in CANCEL_WORDS and intake.draft_id is not None:
+        draft = session.get(Draft, intake.draft_id)
+        if draft is not None and draft.firm_id == user.firm_id and draft.status in {
+            "NEEDS_CLARIFICATION",
+            "DRAFT_READY",
+        }:
+            draft.status = "CANCELLED"
+            draft.ops = [{**op, "status": "CANCELLED"} for op in draft.ops]
+            intake.draft_id = None
+            intake.messages = [
+                *intake.messages,
+                _message("client", clean_text),
+                _message("assistant", "Cancelled the open draft. The approved quote is unchanged."),
+            ]
+            audit(session, user.firm_id, user.id, "FIRST_QUOTE_CANCELLED", draft.id)
+            session.flush()
+            if commit:
+                session.commit()
+            return intake_view(session, user, project_id)
     if intake.draft_id is not None:
         raise ValueError("Intake is complete. Edit the quotation in designer review.")
-    if not text.strip() or len(intake.messages) >= 40:
+    if not clean_text or len(intake.messages) >= 40:
         raise ValueError("Enter a fictional message or start a fresh demo when the chat is full.")
-    messages = [*intake.messages, _message("client", text.strip())]
+    messages = [*intake.messages, _message("client", clean_text)]
     use_model = os.getenv("QSHIFT_INTAKE_MODEL") == "ollama"
     if _scenario(intake) == "itemized":
         return _add_itemized_message(

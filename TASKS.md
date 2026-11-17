@@ -30,10 +30,10 @@ Colab notebook: created but not executed in Colab; marked unverified.
 - [x] Run baseline test, lint, evaluation, secret scan and full type-check commands.
 - [x] Record the audit in `docs/QSHIFT_FOUNDER_AUDIT.md`.
 - [x] Create release gates and known-limitations documents.
-- [ ] Establish the first Git baseline commit after reviewing the staged file list.
-- [ ] Add import mapping preview and explicit alias handling for safe supported CSV/XLSX onboarding.
-- [ ] Add conversational cancellation and explicit draft/version ambiguity handling.
-- [ ] Add regression tests for the new onboarding and conversation states.
+- [x] Establish the first Git baseline commit after reviewing the staged file list (`ed1c670`).
+- [x] Add import mapping preview and explicit alias handling for safe supported CSV/XLSX onboarding.
+- [x] Add conversational cancellation and explicit draft/version ambiguity handling.
+- [x] Add regression tests for the new onboarding and conversation states.
 
 ## P0 safety invariants
 

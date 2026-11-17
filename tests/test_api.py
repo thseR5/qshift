@@ -52,6 +52,37 @@ def test_simulated_api_auth_and_scope(client: TestClient) -> None:
     assert pdf.headers["Cache-Control"] == "no-store"
     assert pdf.content.startswith(b"%PDF-")
 
+    preview = client.post(
+        "/api/imports/rate-card/preview",
+        headers=headers,
+        files={
+            "file": (
+                "rates.csv",
+                b"Item Code,Description,Group,UOM,Unit Price\nX-1,Quartz,Countertop,sqft,70000\n",
+                "text/csv",
+            )
+        },
+    )
+    assert preview.status_code == 200
+    assert preview.json()["mapping"]["rate_paise"] == "Unit Price"
+    assert preview.json()["writes_database"] is False
+
+
+def test_chat_can_cancel_open_revision_without_approval(client: TestClient) -> None:
+    designer = {"Authorization": "Bearer demo-designer-token"}
+    draft = client.post(
+        "/api/changes",
+        headers=designer,
+        json={"project_id": "project-sharma", "text": "Please remove the bedroom false ceiling"},
+    ).json()
+    response = client.post(
+        "/api/simulated-chat/messages",
+        headers=designer,
+        json={"text": "cancel", "project_id": "project-sharma", "draft_id": draft["id"]},
+    )
+    assert response.status_code == 200
+    assert "approved quote is unchanged" in response.json()["reply"]
+
 
 def test_founding_subscription_prices(client: TestClient) -> None:
     response = client.get("/api/pricing")
