@@ -4,7 +4,7 @@
 
 Required: reproducible local environment, deterministic pricing and approval regressions, tenant-isolation tests and fictional data only.
 
-Status: **SUBSTANTIALLY PRESENT**. The current run has 54 passing tests and deterministic financial/approval regressions remain green. Full application type-check and production security are not clean.
+Status: **SUBSTANTIALLY PRESENT**. The current run has 58 passing tests and deterministic financial/approval regressions remain green. Full application type-check and production security are not clean.
 
 ## Gate B — client demonstration
 

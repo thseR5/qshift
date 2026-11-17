@@ -4,6 +4,7 @@ This file is intentionally explicit. A limitation is not a hidden roadmap commit
 
 - The default offline revision provider remains deterministic `MockLLM`; the production-oriented Ollama adapter is available only when explicitly configured.
 - Real-model accuracy is now measured, but poor: qwen3:1.7b produced operation precision 0.025, recall 0.036 and F1 0.030 on 55 cases; the held-out ten scored F1 0.000. It must not be used for a real-firm pilot.
+- The V6.4 forensic scorer separates operation type, target, room, intent and clarification. On the minimal-context rerun, operation-type F1 was 0.593, target F1 0.481, room F1 0.093 and fully-correct case rate 0.109; these are extraction metrics, not approval or customer-success metrics.
 - Local Ollama `qwen3:1.7b` emits schema-valid JSON but frequently confuses ADD/MODIFY/REPLACE, drops rooms, copies quotation context, and mishandles Telugu/Hinglish. The backend keeps uncertain outputs in manual review.
 - The versioned live revision set contains 55 fictional English, Hindi, Hinglish, Telugu and Romanized Telugu cases with raw model evidence in ignored `work/` files.
 - Voice is a transcript fixture. Real audio download, decoding and speech transcription are not implemented.

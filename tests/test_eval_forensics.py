@@ -1,3 +1,5 @@
+from typing import Any
+
 from evals.forensics import (
     aggregate,
     align_operations,
@@ -7,17 +9,17 @@ from evals.forensics import (
 )
 
 
-def op(kind: str, room: str | None, target: str, **extra: object) -> dict:
+def op(kind: str, room: str | None, target: str, **extra: object) -> dict[str, Any]:
     return {"op": kind, "room": room, "target_text": target, **extra}
 
 
-def test_alias_and_containment_matching_are_explicit():
+def test_alias_and_containment_matching_are_explicit() -> None:
     assert normalize_room("Guest Room") == "guest bedroom"
     assert target_match("wardrobe", "guest bedroom wardrobe")
     assert not target_match("wardrobe", "kitchen countertop")
 
 
-def test_alignment_does_not_duplicate_a_prediction():
+def test_alignment_does_not_duplicate_a_prediction() -> None:
     expected = [op("REMOVE", "Bedroom", "ceiling"), op("REPLACE", "Kitchen", "granite")]
     predicted = [op("REMOVE", None, "false ceiling")]
     assert len(align_operations(expected, predicted)) == 1
@@ -27,7 +29,7 @@ def test_alignment_does_not_duplicate_a_prediction():
     assert result.predicted_count == 1
 
 
-def test_component_metrics_separate_type_target_room_and_clarification():
+def test_component_metrics_separate_type_target_room_and_clarification() -> None:
     result = score_case(
         [op("MODIFY", "Guest Bedroom", "wardrobe")],
         [op("ADD", None, "guest bedroom wardrobe", missing_fields=["quantity"])],
@@ -42,7 +44,7 @@ def test_component_metrics_separate_type_target_room_and_clarification():
     assert result.predicted_clarification
 
 
-def test_aggregate_reports_precision_recall_without_hidden_aliases():
+def test_aggregate_reports_precision_recall_without_hidden_aliases() -> None:
     rows = [
         score_case([op("REMOVE", "Bedroom", "ceiling")], [op("REMOVE", "Bedroom", "ceiling")]),
         score_case([op("ADD", "Balcony", "screen")], []),

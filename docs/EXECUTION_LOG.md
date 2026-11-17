@@ -216,8 +216,8 @@ make lint
 Ruff passed; configured engine/approval mypy passed
 
 full mypy comparison
-219 errors on V6.3 working tree; 219 errors on git baseline b7b59ec
-=> no newly introduced full-check errors detected; release-critical configured gates remain green
+218 errors on V6.4 working tree; 219 errors on git baseline b7b59ec
+=> one existing evaluator typing error was fixed; no newly introduced full-check errors detected; release-critical configured gates remain green
 ```
 
 The exact live evaluation evidence is in `work/revision_eval_live_v63.jsonl` and the held-out
@@ -266,3 +266,5 @@ No-context diagnostic: operation-type F1 0.571 on the same six cases
 
 Evidence and the full per-case table are in `docs/REVISION_AI_FORENSICS_V64.md`. No university
 GPU job was submitted because Slurm authorization and site resource values are not confirmed.
+The submission wrapper was safety-checked with `QSHIFT_HPC_AUTHORIZED=false` and refused with
+exit code 2 before invoking `sbatch`.

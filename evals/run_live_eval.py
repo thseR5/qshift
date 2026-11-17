@@ -25,7 +25,7 @@ def main() -> int:
     output_path = Path(os.getenv("QSHIFT_LIVE_EVAL_OUTPUT", "work/revision_eval_live.jsonl"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("")
-    totals = defaultdict(lambda: [0, 0, 0, 0, 0, 0, 0.0])
+    totals: defaultdict[str, list[float]] = defaultdict(lambda: [0, 0, 0, 0, 0, 0, 0.0])
     examples: list[dict] = []
     invalid_outputs = 0
     latencies: list[float] = []

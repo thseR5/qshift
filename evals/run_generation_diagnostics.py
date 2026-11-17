@@ -6,8 +6,10 @@ import json
 import os
 import time
 from pathlib import Path
+from typing import Any
 
-from qshift.agent.extraction import LocalModelUnavailable, OllamaChangeLLM
+from qshift.agent.extraction import OllamaChangeLLM
+from qshift.agent.local_model import LocalModelUnavailable
 
 CASES = [
     ("en-01", "Increase the guest bedroom wardrobe from 6 by 7 feet to 8 by 7 feet."),
@@ -28,7 +30,7 @@ FULL_CONTEXT = {
 }
 
 
-def run_variant(name: str, num_predict: int, context: dict) -> list[dict]:
+def run_variant(name: str, num_predict: int, context: dict[str, Any]) -> list[dict[str, Any]]:
     os.environ["QSHIFT_CHANGE_NUM_PREDICT"] = str(num_predict)
     model = OllamaChangeLLM()
     rows = []
