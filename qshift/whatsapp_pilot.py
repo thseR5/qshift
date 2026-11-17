@@ -71,6 +71,26 @@ def require_fictional_designer(session: Session) -> User:
     return user
 
 
+def require_fictional_staff(session: Session, conversation: Conversation) -> User:
+    """Resolve an enrolled WhatsApp identity inside its illustrative tenant."""
+
+    if conversation.user_id is None:
+        return require_fictional_designer(session)
+    user = session.scalar(
+        select(User)
+        .join(Firm, Firm.id == User.firm_id)
+        .where(
+            User.id == conversation.user_id,
+            User.firm_id == PILOT_FIRM,
+            User.role.in_(["OWNER", "APPROVER", "DESIGNER"]),
+            Firm.illustrative.is_(True),
+        )
+    )
+    if user is None:
+        raise RuntimeError("The WhatsApp enrollment is not bound to a valid fictional staff identity")
+    return user
+
+
 def capture_reply(session: Session, user: User, conversation: Conversation, message: str) -> str:
     try:
         with session.begin_nested():
@@ -93,11 +113,22 @@ def capture_reply(session: Session, user: User, conversation: Conversation, mess
         conversation.draft_id = result["draft"]["id"]
     if result.get("reply", "").startswith("Cancelled the open draft"):
         conversation.draft_id = None
+    if result.get("approved_version_id"):
+        conversation.pending_version_id = result["approved_version_id"]
+        conversation.draft_id = None
+        conversation.document_state = "approved_pending"
+    if result.get("rejected_draft_id"):
+        conversation.draft_id = None
     return result["reply"]
 
 
 def record_staff_consent(
-    database: Engine, credentials: WebhookCredentials, reference: str, *, first_quote: bool = False
+    database: Engine,
+    credentials: WebhookCredentials,
+    reference: str,
+    *,
+    first_quote: bool = False,
+    staff_user_id: str = PILOT_DESIGNER,
 ) -> None:
     if re.fullmatch(r"[A-Za-z0-9_-]{1,64}", reference) is None:
         raise ValueError("Use a short, non-identifying consent reference, such as CONSENT-001")
@@ -111,13 +142,22 @@ def record_staff_consent(
             .values(firm_id=identity[0], enrollment_key=identity[1])
             .on_conflict_do_nothing(index_elements=["firm_id", "enrollment_key"])
         )
-        user = require_fictional_designer(session)
+        user = session.scalar(
+            select(User).where(
+                User.id == staff_user_id,
+                User.firm_id == PILOT_FIRM,
+                User.role.in_(["OWNER", "APPROVER", "DESIGNER"]),
+            )
+        )
+        if user is None:
+            raise ValueError("Use a fictional OWNER, APPROVER or DESIGNER user for enrollment")
         conversation = lock_conversation(session, identity)
         assert conversation is not None
         if conversation.delivery_opted_out or conversation.consent_recorded_at is not None:
             raise ValueError("This pilot enrollment is already recorded or opted out")
         conversation.consent_reference = reference
         conversation.consent_recorded_at = now_utc()
+        conversation.user_id = user.id
         if first_quote:
             conversation.project_id = start_sample(session, user, commit=False)["project_id"]
             conversation.document_state = "pending"
@@ -136,7 +176,11 @@ def suppress_ready_replies(session: Session, identity: tuple[str, str]) -> None:
 
 
 def pilot_reply(session: Session, user: User, conversation: Conversation, message: str) -> str:
-    if conversation.document_state is None:
+    if conversation.document_state is None or conversation.document_state in {
+        "approved_pending",
+        "accepted",
+        "needs_review",
+    }:
         return capture_reply(session, user, conversation, message)
     if conversation.draft_id:
         return "Your fictional quote is with the designer for review."
@@ -178,7 +222,7 @@ def process_next_incoming(database: Engine, credentials: WebhookCredentials) -> 
         receipt = session.scalar(pending)
         if receipt is None:
             return False
-        user = require_fictional_designer(session)
+        user = require_fictional_staff(session, conversation)
         assert receipt.inbound_text is not None
         receipt.reply = pilot_reply(session, user, conversation, receipt.inbound_text)
         receipt.inbound_text = None
@@ -215,7 +259,7 @@ def create_receive_app(
             start = conversation.consent_start()
             if start is None:
                 return
-            user = require_fictional_designer(session)
+            user = require_fictional_staff(session, conversation)
 
             for message in messages:
                 if message.body.casefold() in OPT_OUT_COMMANDS:
@@ -342,6 +386,7 @@ def main() -> None:
     parser.add_argument("--reference", help="Non-identifying reference to the staff opt-in record")
     parser.add_argument("--first-quote", action="store_true")
     parser.add_argument("--hash", help="Exact content hash displayed in review")
+    parser.add_argument("--staff-user-id", default=PILOT_DESIGNER)
     args = parser.parse_args()
     if args.command == "consent" and not args.reference:
         parser.error("consent requires --reference")
@@ -351,7 +396,11 @@ def main() -> None:
     if args.command == "consent":
         try:
             record_staff_consent(
-                engine, read_credentials(), args.reference, first_quote=args.first_quote
+                engine,
+                read_credentials(),
+                args.reference,
+                first_quote=args.first_quote,
+                staff_user_id=args.staff_user_id,
             )
         except ValueError as exc:
             parser.error(str(exc))

@@ -1343,7 +1343,12 @@ def draft_view(
 
 
 def issue_approval_token(
-    session: Session, user: User, draft_id: str, expected_hash: str | None = None
+    session: Session,
+    user: User,
+    draft_id: str,
+    expected_hash: str | None = None,
+    *,
+    commit: bool = True,
 ) -> str:
     if user.role not in {"OWNER", "APPROVER"}:
         raise PermissionError("Only an OWNER or APPROVER can approve quotations")
@@ -1366,11 +1371,14 @@ def issue_approval_token(
     approval.content_sha256 = draft.content_sha256
     approval.expires_at = expiry
     audit(session, user.firm_id, user.id, "APPROVAL_TOKEN_ISSUED", draft.id)
-    session.commit()
+    if commit:
+        session.commit()
     return token
 
 
-def reject_draft(session: Session, user: User, draft_id: str) -> dict[str, str]:
+def reject_draft(
+    session: Session, user: User, draft_id: str, *, commit: bool = True
+) -> dict[str, str]:
     draft = session.scalar(select(Draft).where(Draft.id == draft_id, Draft.firm_id == user.firm_id))
     if draft is None:
         raise LookupError("Draft not found")
@@ -1381,7 +1389,8 @@ def reject_draft(session: Session, user: User, draft_id: str) -> dict[str, str]:
     draft.status = "REJECTED"
     draft.ops = [{**op, "status": "REJECTED"} for op in draft.ops]
     audit(session, user.firm_id, user.id, "REVISION_REJECTED", draft.id)
-    session.commit()
+    if commit:
+        session.commit()
     return {"draft_id": draft.id, "status": draft.status}
 
 
@@ -1414,7 +1423,12 @@ def cancel_draft(
 
 
 def approve_draft(
-    session: Session, user: User, token: str, *, write_pdf: bool = True
+    session: Session,
+    user: User,
+    token: str,
+    *,
+    write_pdf: bool = True,
+    commit: bool = True,
 ) -> dict[str, Any]:
     if user.role not in {"OWNER", "APPROVER"}:
         raise PermissionError("Only an OWNER or APPROVER can approve quotations")
@@ -1515,7 +1529,8 @@ def approve_draft(
     action = "INITIAL_QUOTE_APPROVED" if number == 1 else "REVISION_APPROVED"
     audit(session, user.firm_id, user.id, action, version.id, draft.content_sha256)
     queued_pdf = queue_simulated_pdf(session, user, quote, version)
-    session.commit()
+    if commit:
+        session.commit()
     pdf_path = queued_pdf or f"/api/versions/{version.id}/pdf"
     if queued_pdf is None and write_pdf and number > 1:
         pdf_path = make_pdf(version, "Demo Interiors", "Sharma Residence")

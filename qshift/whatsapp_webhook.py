@@ -38,7 +38,9 @@ class TextBody(BaseModel):
 
 class Message(BaseModel):
     id: str = Field(min_length=1, max_length=512)
-    text: TextBody
+    type: str = Field(default="text", max_length=32)
+    text: TextBody | None = None
+    document: dict[str, object] | None = None
     timestamp: str | None = None
 
 
@@ -92,13 +94,24 @@ def staff_texts(event: Event, credentials: WebhookCredentials) -> Iterator[Incom
             if value.metadata.phone_number_id != credentials.phone_number_id:
                 continue
             for raw in value.messages:
-                if raw.get("type") != "text" or raw.get("from") != credentials.sender_id:
+                if raw.get("from") != credentials.sender_id:
                     continue
                 try:
                     message = Message.model_validate(raw)
                 except ValidationError:
                     continue
-                body = message.text.body.strip()
+                if message.type == "text" and message.text is not None:
+                    body = message.text.body.strip()
+                elif message.type == "document" and message.document is not None:
+                    filename = str(message.document.get("filename", "document"))
+                    suffix = filename.casefold().rsplit(".", 1)[-1] if "." in filename else ""
+                    if suffix not in {"csv", "xlsx"}:
+                        continue
+                    # Meta media bytes are deliberately not fetched by this simulated adapter.
+                    # The service will ask for an explicit mapping before importing anything.
+                    body = f"document {filename[:160]}"
+                else:
+                    continue
                 if 0 < len(body) <= 4000:
                     yield IncomingText(message.id, body, provider_time(message.timestamp))
 

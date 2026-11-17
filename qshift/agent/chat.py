@@ -10,11 +10,14 @@ from qshift.engine.pricing import format_inr
 from qshift.models import Draft, QuoteVersion, User
 from qshift.services import (
     amend_open_draft,
+    approve_draft,
     cancel_draft,
     draft_view,
+    issue_approval_token,
     pin_project,
     project_memory,
     projects_for_user,
+    reject_draft,
     require_project,
     resolve_catalogue,
     resolve_catalogue_text,
@@ -26,7 +29,9 @@ HELP = (
     "Send projects to see your projects, then use <project ID> to select one. "
     "Describe a quotation change in your own words. "
     "Send status for the open draft, choose <SKU> to answer a catalogue question, "
-    "history for approved quotations, changes for recent requests, or cancel to discard an open draft."
+    "review for the before/after approval summary, history for approved quotations, "
+    "changes for recent requests, or cancel to discard an open draft. "
+    "A plain yes never approves a quotation."
 )
 OPEN_DRAFT_STATUSES = ("NEEDS_CLARIFICATION", "DRAFT_READY")
 
@@ -36,8 +41,9 @@ def draft_reply(draft: dict[str, Any]) -> dict[str, Any]:
     if draft["status"] == "DRAFT_READY":
         lines.append(
             f"Draft ready for review. Proposed total {draft['revised_total']} "
-            f"(change {draft['net_change']}). An authorized approver can review it in Qshift."
+            f"(change {draft['net_change']}). Send review to see the before/after summary."
         )
+        lines.append("Only an enrolled OWNER or APPROVER can authorize it with the one-time token.")
     else:
         lines.append("I need more information before this revision can be priced for approval.")
         for operation in draft["ops"]:
@@ -52,7 +58,14 @@ def draft_reply(draft: dict[str, Any]) -> dict[str, Any]:
             else:
                 target = operation["target_text"]
                 lines.append(f"Ask the designer to clarify the quoted line or scope for {target}.")
-    return {"reply": "\n".join(lines), "draft": draft}
+    result: dict[str, Any] = {"reply": "\n".join(lines), "draft": draft}
+    if draft["status"] == "DRAFT_READY":
+        result["interactive"] = {
+            "type": "button",
+            "buttons": ["review", "cancel"],
+            "fallback": "Send review to inspect the exact before/after quotation.",
+        }
+    return result
 
 
 def respond_to_message(
@@ -74,11 +87,37 @@ def respond_to_message(
 
     if not argument and command in {"help", "hi", "hello"}:
         return {"reply": HELP}
+    if command == "document":
+        suffix = argument.casefold().rsplit(".", 1)[-1] if "." in argument else ""
+        if suffix not in {"csv", "xlsx"}:
+            return {"reply": "Send a CSV or XLSX document. Other file types are not accepted."}
+        return {
+            "reply": (
+                f"Received {argument[:160]} in the SIMULATED WhatsApp adapter. "
+                "The file is untrusted; confirm the project and column mapping before any "
+                "rate or quotation import. No Meta media bytes are downloaded in this pilot."
+            ),
+            "document_received": argument[:160],
+            "interactive": {
+                "type": "list",
+                "title": "Import target",
+                "items": ["rate card", "quotation"],
+                "fallback": "Reply with rate card or quotation after reviewing the mapping.",
+            },
+        }
     if not argument and command == "projects":
         projects = projects_for_user(session, user)
         lines = [f"{project['name']} · {project['id']}" for project in projects]
         reply = "\n".join(["Reply with use <project ID>.", *lines])
-        return {"reply": reply if projects else "No projects are available in your firm."}
+        return {
+            "reply": reply if projects else "No projects are available in your firm.",
+            "interactive": {
+                "type": "list",
+                "title": "Choose a project",
+                "items": [{"id": project["id"], "title": project["name"]} for project in projects],
+                "fallback": "Reply with use <project ID>.",
+            },
+        }
     if command == "use":
         if not argument:
             return {"reply": "Reply with use <project ID>. Send projects to find the ID."}
@@ -88,7 +127,38 @@ def respond_to_message(
             "project_id": project["id"],
         }
     if command in {"approve", "reject"}:
-        return {"reply": "Use the authenticated Qshift review screen to approve or reject a draft."}
+        if user.role not in {"OWNER", "APPROVER"}:
+            return {
+                "reply": (
+                    "Only an enrolled owner or approver can authorize a quotation revision. "
+                    "The authenticated Qshift review screen is not available to this identity."
+                )
+            }
+        if not argument:
+            return {
+                "reply": (
+                    "Send review first. Approval requires its one-time token; a plain 'yes' "
+                    "is not accepted. The authenticated Qshift review screen is replaced by "
+                    "this WhatsApp review command."
+                )
+            }
+        if draft_id is None:
+            return {"reply": "There is no open revision to authorize."}
+        if command == "reject":
+            result = reject_draft(session, user, draft_id, commit=commit)
+            return {"reply": "Revision rejected. The approved quotation is unchanged.", "rejected_draft_id": result["draft_id"]}
+        try:
+            result = approve_draft(session, user, argument, write_pdf=False, commit=commit)
+        except (LookupError, PermissionError, ValueError) as exc:
+            return {"reply": f"Approval failed safely: {exc}"}
+        return {
+            "reply": (
+                f"Approved quotation revision v{result['version']} for {result['total']}. "
+                "The exact PDF is queued for delivery in this simulated WhatsApp channel."
+            ),
+            "approved_version_id": result["version_id"],
+            "pdf_path": result["pdf_path"],
+        }
     if project_id is None:
         return {"reply": "Select a project first. Send projects to find its ID."}
 
@@ -149,6 +219,56 @@ def respond_to_message(
         if base is None:
             raise LookupError("Base quotation version not found")
         return draft_reply(draft_view(draft, base.total_paise, base.lines))
+    if not argument and command == "review":
+        if user.role not in {"OWNER", "APPROVER"}:
+            return {"reply": "This draft is waiting for an enrolled owner or approver."}
+        draft = session.scalar(
+            select(Draft).where(
+                Draft.project_id == project.id,
+                Draft.firm_id == user.firm_id,
+                Draft.status == "DRAFT_READY",
+            )
+        )
+        if draft is None:
+            return {"reply": f"There is no ready revision for {project.name}."}
+        if draft.base_version == 0:
+            return {"reply": "The first quotation must be reviewed through the fictional intake flow."}
+        base = session.scalar(
+            select(QuoteVersion).where(
+                QuoteVersion.firm_id == user.firm_id,
+                QuoteVersion.quote_id == draft.quote_id,
+                QuoteVersion.number == draft.base_version,
+            )
+        )
+        if base is None:
+            raise LookupError("Base quotation version not found")
+        view = draft_view(draft, base.total_paise, base.lines)
+        token = issue_approval_token(
+            session, user, draft.id, draft.content_sha256, commit=commit
+        )
+        changes = [
+            f"{item['kind']}: {item['room']} / {item['description']} ({item['delta']})"
+            for item in view["line_diffs"]
+            if item["kind"] != "unchanged"
+        ]
+        return {
+            "reply": "\n".join(
+                [
+                    f"{project.name} revision review",
+                    f"Before: {view['original_total']} · After: {view['revised_total']} · Change: {view['net_change']}",
+                    *changes,
+                    f"Approve exact revision with: approve {token}",
+                    "Reject with: reject <anything>",
+                ]
+            ),
+            "draft_id": draft.id,
+            "review_token_issued": True,
+            "interactive": {
+                "type": "button",
+                "buttons": ["approve <one-time token>", "reject"],
+                "fallback": f"Approve exact revision with: approve {token}",
+            },
+        }
     open_query = select(Draft).where(
         Draft.firm_id == user.firm_id,
         Draft.project_id == project.id,

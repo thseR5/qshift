@@ -280,16 +280,81 @@ class OllamaChangeLLM:
             ) from exc
 
 
+class BedrockChangeLLM:
+    """Opt-in AWS Bedrock adapter; never selected by default.
+
+    boto3 is intentionally optional. Selecting this provider without installing boto3, AWS
+    credentials, a region, and an approved model fails closed rather than silently falling back
+    to a mock or local model.
+    """
+
+    def __init__(self, model: str | None = None, region: str | None = None) -> None:
+        self.model = model or os.getenv("QSHIFT_BEDROCK_MODEL", "")
+        self.region = region or os.getenv("AWS_REGION", os.getenv("AWS_DEFAULT_REGION", ""))
+
+    def extract(self, text: str, context: dict[str, Any] | None = None) -> ChangeExtraction:
+        if os.getenv("QSHIFT_BEDROCK_ENABLED") != "true":
+            raise LocalModelUnavailable(
+                "Bedrock is disabled; set QSHIFT_BEDROCK_ENABLED=true only after model qualification."
+            )
+        if not self.model or not self.region:
+            raise LocalModelUnavailable("Bedrock requires QSHIFT_BEDROCK_MODEL and AWS_REGION.")
+        try:
+            import boto3  # type: ignore[import-not-found]
+        except ImportError as exc:
+            raise LocalModelUnavailable("Install the optional boto3 dependency for Bedrock.") from exc
+        schema = ModelChangeExtraction.model_json_schema()
+        try:
+            client = boto3.client("bedrock-runtime", region_name=self.region)
+            response = client.converse(
+                modelId=self.model,
+                system=[{"text": CHANGE_INSTRUCTIONS + "\nSchema: " + json.dumps(schema)}],
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "text": json.dumps(
+                                    {"message": text, "grounding_context": context or {}},
+                                    ensure_ascii=False,
+                                )
+                            }
+                        ],
+                    }
+                ],
+                inferenceConfig={"temperature": 0},
+            )
+            content = response["output"]["message"]["content"][0]["text"]
+            payload = json.loads(content)
+            payload["operations"] = [
+                {key: value for key, value in operation.items() if key != "status"}
+                for operation in payload.get("operations", [])
+            ]
+            result = ModelChangeExtraction.model_validate(payload)
+            return ChangeExtraction(
+                intent=result.intent,
+                operations=[ChangeOp(**operation.model_dump(mode="json"), status="PROPOSED") for operation in result.operations],
+                clarification=result.clarification,
+                notes=result.notes,
+            )
+        except Exception as exc:  # provider failures must fail closed at this boundary
+            if isinstance(exc, LocalModelUnavailable):
+                raise
+            raise LocalModelUnavailable("Bedrock returned no valid structured change proposal.") from exc
+
+
 def get_change_extractor(provider: str | None = None) -> ChangeExtractor:
     """Select a provider explicitly; default stays offline and deterministic."""
 
     selected = str(provider or os.getenv("QSHIFT_CHANGE_MODEL_PROVIDER", "mock")).casefold()
     if selected in {"ollama", "qwen", "local"}:
         return OllamaChangeLLM()
+    if selected in {"bedrock", "aws-bedrock"}:
+        return BedrockChangeLLM()
     if selected in {"mock", "offline", "fixture"}:
         return MockLLM()
     raise ValueError(
-        f"Unsupported QSHIFT_CHANGE_MODEL_PROVIDER={selected!r}; use mock or ollama."
+        f"Unsupported QSHIFT_CHANGE_MODEL_PROVIDER={selected!r}; use mock, ollama or bedrock."
     )
 
 

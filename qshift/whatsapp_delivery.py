@@ -28,6 +28,7 @@ from qshift.whatsapp_pilot import (
     read_credentials,
     require_database_setting,
     require_fictional_designer,
+    require_fictional_staff,
 )
 from qshift.whatsapp_store import Conversation, Receipt, lock_conversation
 from qshift.whatsapp_webhook import WebhookCredentials
@@ -246,6 +247,80 @@ def deliver_first_quote(
     return state
 
 
+def deliver_pending_pdf(
+    database: Engine,
+    credentials: WebhookCredentials,
+    send: Callable[[bytes], None],
+) -> str:
+    """Deliver the exact human-approved revision queued by the WhatsApp agent.
+
+    This is deliberately separate from text reply delivery. The version ID is
+    stored on the tenant-scoped conversation after ``approve <token>`` and is
+    never inferred from a chat message such as ``yes``.
+    """
+
+    identity = (PILOT_FIRM, enrollment_key(credentials))
+    with Session(database) as session, session.begin():
+        conversation = lock_conversation(session, identity)
+        now = now_utc()
+        if (
+            conversation is None
+            or conversation.document_state != "approved_pending"
+            or not conversation.pending_version_id
+            or not conversation.has_active_consent(now + 2 * MIN_WINDOW_REMAINING)
+        ):
+            raise ValueError("No human-approved WhatsApp PDF is queued for delivery.")
+        require_fictional_staff(session, conversation)
+        version = session.scalar(
+            select(QuoteVersion).where(
+                QuoteVersion.id == conversation.pending_version_id,
+                QuoteVersion.firm_id == conversation.firm_id,
+                QuoteVersion.status == "APPROVED",
+            )
+        )
+        if version is None:
+            raise ValueError("The approved quotation version is unavailable.")
+        quote = session.scalar(
+            select(Quote).where(
+                Quote.id == version.quote_id,
+                Quote.firm_id == conversation.firm_id,
+                Quote.project_id == conversation.project_id,
+            )
+        )
+        if quote is None:
+            raise ValueError("The approved quotation is not bound to this project.")
+        pdf = render_pdf(
+            version,
+            "QShift Test Studio",
+            "Fictional project",
+            fictional_test=True,
+        )
+        conversation.document_state = "attempted"
+
+    # Mark the attempt before transport. An unknown timeout is never retried
+    # automatically, preserving replay safety for document sends.
+    with Session(database) as session:
+        conversation = session.get(Conversation, identity)
+        authorized = conversation is not None and conversation.has_active_consent(
+            now_utc() + 2 * MIN_WINDOW_REMAINING
+        )
+    if not authorized:
+        state = "suppressed"
+    else:
+        try:
+            send(pdf)
+        except DeliveryError as exc:
+            logging.warning("WhatsApp approved PDF needs review: %s", exc)
+            state = "needs_review"
+        else:
+            state = "accepted"
+    with Session(database) as session, session.begin():
+        conversation = session.get(Conversation, identity)
+        if conversation is not None:
+            conversation.document_state = state
+    return state
+
+
 def ready_replies(identity: tuple[str, str], now: datetime):
     return (
         select(Receipt)
@@ -310,13 +385,20 @@ def deliver_next(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Preview or deliver replies for one pilot sender")
     parser.add_argument(
-        "command", choices=["preview", "run", "document"], nargs="?", default="preview"
+        "command", choices=["preview", "run", "document", "document-pending"], nargs="?", default="preview"
     )
     parser.add_argument("--once", action="store_true", help="Process at most one reply in run mode")
     parser.add_argument("--hash", help="Exact content hash from the human-approved quote")
     args = parser.parse_args()
     require_database_setting()
     credentials = read_credentials()
+    if args.command == "document-pending":
+        try:
+            state = deliver_pending_pdf(engine, credentials, meta_document_sender(credentials))
+        except ValueError as exc:
+            parser.error(str(exc))
+        print(f"Pilot approved PDF state: {state}. The tester should confirm receipt in WhatsApp.")
+        return
     if args.command == "document":
         if not re.fullmatch(r"[a-f0-9]{64}", args.hash or ""):
             parser.error("document requires the exact --hash shown in review")

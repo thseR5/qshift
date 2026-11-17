@@ -268,3 +268,17 @@ Evidence and the full per-case table are in `docs/REVISION_AI_FORENSICS_V64.md`.
 GPU job was submitted because Slurm authorization and site resource values are not confirmed.
 The submission wrapper was safety-checked with `QSHIFT_HPC_AUTHORIZED=false` and refused with
 exit code 2 before invoking `sbatch`.
+## 2026-11-17 — V7 WhatsApp-native workflow slice
+
+- Bound a WhatsApp enrollment to a tenant-scoped fictional staff user and added a migration for
+  `user_id` and `pending_version_id`.
+- Reoriented chat commands toward the channel: `projects`, `use`, `status`, `review`, `approve
+  <one-time-token>`, `reject`, `history`, `changes` and `cancel`. Interactive list/button metadata
+  is returned with text fallbacks; a plain `yes` cannot approve.
+- Added `deliver_pending_pdf`, which renders the exact approved immutable version, commits the
+  send attempt before transport and records `accepted`, `needs_review` or `suppressed`.
+- Added a disabled-by-default Bedrock provider boundary and an AWS account/deployment checklist.
+  The account checklist was run; AWS CLI is not installed in this workspace, so no account or
+  credit facts were inferred and no AWS resource was created.
+- Verification: `make test` — 58 passed, 1 warning. `make lint` — Ruff and configured mypy passed.
+

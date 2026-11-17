@@ -17,8 +17,10 @@ class Conversation(WhatsAppBase):
 
     firm_id: Mapped[str] = mapped_column(String(36), primary_key=True)
     enrollment_key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str | None] = mapped_column(String(36))
     project_id: Mapped[str | None] = mapped_column(String(36))
     draft_id: Mapped[str | None] = mapped_column(String(36))
+    pending_version_id: Mapped[str | None] = mapped_column(String(36))
     delivery_opted_out: Mapped[bool] = mapped_column(Boolean, default=False)
     consent_reference: Mapped[str | None] = mapped_column(String(64))
     consent_recorded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
