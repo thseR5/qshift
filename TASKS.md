@@ -34,6 +34,7 @@ Colab notebook: created but not executed in Colab; marked unverified.
 - [x] Add import mapping preview and explicit alias handling for safe supported CSV/XLSX onboarding.
 - [x] Add conversational cancellation and explicit draft/version ambiguity handling.
 - [x] Add regression tests for the new onboarding and conversation states.
+- [x] Add a truthful local public entry point that links to the simulated demo without claiming deployment or live WhatsApp.
 
 ## P0 safety invariants
 

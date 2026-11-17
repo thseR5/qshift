@@ -1146,6 +1146,7 @@ def project_memory(session: Session, user: User, project_id: str) -> dict[str, A
         "included": sum(op.get("status") == "APPLIED" for op in ops),
         "pending": sum(op.get("status") in {"NEEDS_INFO", "VERIFIED"} for op in ops),
         "rejected": sum(op.get("status") == "REJECTED" for op in ops),
+        "cancelled": sum(op.get("status") == "CANCELLED" for op in ops),
         "records": [
             {"operation": op["op"], "target": op.get("target_text"), "status": op.get("status")}
             for op in ops

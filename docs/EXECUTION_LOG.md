@@ -66,6 +66,24 @@ mypy qshift/engine qshift/approval passed
 
 Status: local fictional/test data only. The mapping is deterministic and intentionally does not use fuzzy matching or auto-verify any rate.
 
+## 2026-11-17 — truthful public entry point
+
+Changed:
+
+- Added a local-only `/site` marketing entry point with a clear fictional/simulated boundary, pilot CTA and a link into the working demo.
+- Added responsive marketing CSS under `qshift/web/marketing.css`; no official logo asset was copied or invented.
+- Added API coverage for `/site` and its stylesheet.
+- Project change memory now reports cancelled operations explicitly.
+
+Boundary: no DNS, hosting, Meta, WhatsApp or external email action was taken.
+
+## 2026-11-17 — read-only domain check
+
+- `qshift.in` resolved to `192.64.119.99`.
+- HTTPS timed out after 10 seconds.
+- No DNS, registrar, hosting or certificate change was attempted.
+- Evidence is recorded in `docs/DOMAIN_AND_DEPLOYMENT_AUDIT.md`; deployment remains unverified.
+
 ## Next entry format
 
 ```text

@@ -180,6 +180,11 @@ def index() -> FileResponse:
     return FileResponse("qshift/web/studio.html" if STUDIO_MODE else "qshift/web/index.html")
 
 
+@app.get("/site", response_class=HTMLResponse)
+def marketing_site() -> FileResponse:
+    return FileResponse("qshift/web/marketing.html")
+
+
 @app.post("/api/studio/session")
 def studio_login(
     body: LoginRequest, request: Request, response: Response, session: SessionDep

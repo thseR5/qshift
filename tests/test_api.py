@@ -33,6 +33,10 @@ def test_simulated_api_auth_and_scope(client: TestClient) -> None:
     home = client.get("/")
     assert home.status_code == 200
     assert "SIMULATED" in home.text
+    site = client.get("/site")
+    assert site.status_code == 200
+    assert "Make every change count" in site.text
+    assert client.get("/static/marketing.css").status_code == 200
     assert client.get("/static/app.js").status_code == 200
     assert client.get("/api/projects").status_code == 401
     headers = {"Authorization": "Bearer demo-designer-token"}

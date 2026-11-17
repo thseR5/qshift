@@ -110,7 +110,7 @@ def respond_to_message(
             "reply": (
                 f"{project.name}, last 7 days. {memory['requested']} requested, "
                 f"{memory['included']} included, {memory['pending']} pending, "
-                f"{memory['rejected']} rejected."
+                f"{memory['rejected']} rejected, {memory['cancelled']} cancelled."
             )
         }
     if command == "choose":
