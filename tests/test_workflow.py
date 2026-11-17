@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from qshift.agent.extraction import ChangeExtraction, ChangeOp
 from qshift.agent.local_model import LocalModelUnavailable
@@ -164,13 +165,15 @@ def test_provider_proposal_modifies_quantity_without_pricing_authority(session, 
     assert kitchen["rate_paise"] == 65000
 
 
-def test_provider_hallucinated_target_is_held_for_source_review(session, monkeypatch):
+def test_provider_hallucinated_target_is_held_for_source_review(
+    session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
     seed_demo(session)
-    designer, _ = users(session)
+    designer = session.scalar(select(User).where(User.id == "user-designer"))
     assert designer
 
     class Provider:
-        def extract(self, _text, _context):
+        def extract(self, _text: str, _context: dict[str, object]) -> ChangeExtraction:
             return ChangeExtraction(
                 intent="REMOVE",
                 operations=[
