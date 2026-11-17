@@ -84,6 +84,14 @@ Boundary: no DNS, hosting, Meta, WhatsApp or external email action was taken.
 - No DNS, registrar, hosting or certificate change was attempted.
 - Evidence is recorded in `docs/DOMAIN_AND_DEPLOYMENT_AUDIT.md`; deployment remains unverified.
 
+## 2026-11-17 — reproducible demo recheck
+
+```text
+make demo
+Demo complete. No live messaging or external send occurred.
+PDF generated: demo-output/sharma-residence-quote-v2.pdf
+```
+
 ## Next entry format
 
 ```text
