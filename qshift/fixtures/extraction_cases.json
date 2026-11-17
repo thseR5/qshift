@@ -1,0 +1,3242 @@
+[
+  {
+    "id": "english-001",
+    "language": "english",
+    "text": "Kitchen granite to quartz; remove bedroom false ceiling (take 1)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-002",
+    "language": "english",
+    "text": "Please replace the kitchen granite with quartz and remove the bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-003",
+    "language": "english",
+    "text": "Kitchen countertop: change granite to quartz. Bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-004",
+    "language": "english",
+    "text": "Kitchen granite to quartz; remove bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-005",
+    "language": "english",
+    "text": "Please replace the kitchen granite with quartz and remove the bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-006",
+    "language": "english",
+    "text": "Kitchen countertop: change granite to quartz. Bedroom false ceiling hatao (take 6)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-007",
+    "language": "english",
+    "text": "Kitchen granite to quartz; remove bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-008",
+    "language": "english",
+    "text": "Please replace the kitchen granite with quartz and remove the bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-009",
+    "language": "english",
+    "text": "Kitchen countertop: change granite to quartz. Bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-010",
+    "language": "english",
+    "text": "Kitchen granite to quartz; remove bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-011",
+    "language": "english",
+    "text": "Please replace the kitchen granite with quartz and remove the bedroom false ceiling (take 11)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-012",
+    "language": "english",
+    "text": "Kitchen countertop: change granite to quartz. Bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-013",
+    "language": "english",
+    "text": "Kitchen granite to quartz; remove bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-014",
+    "language": "english",
+    "text": "Please replace the kitchen granite with quartz and remove the bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-015",
+    "language": "english",
+    "text": "Kitchen countertop: change granite to quartz. Bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-016",
+    "language": "english",
+    "text": "Kitchen granite to quartz; remove bedroom false ceiling (take 16)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-017",
+    "language": "english",
+    "text": "Please replace the kitchen granite with quartz and remove the bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-018",
+    "language": "english",
+    "text": "Kitchen countertop: change granite to quartz. Bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-019",
+    "language": "english",
+    "text": "Kitchen granite to quartz; remove bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-020",
+    "language": "english",
+    "text": "Please replace the kitchen granite with quartz and remove the bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-021",
+    "language": "english",
+    "text": "Kitchen countertop: change granite to quartz. Bedroom false ceiling hatao (take 21)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-022",
+    "language": "english",
+    "text": "Kitchen granite to quartz; remove bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-023",
+    "language": "english",
+    "text": "Please replace the kitchen granite with quartz and remove the bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-024",
+    "language": "english",
+    "text": "Kitchen countertop: change granite to quartz. Bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-025",
+    "language": "english",
+    "text": "Kitchen granite to quartz; remove bedroom false ceiling",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-001",
+    "language": "hindi_latin",
+    "text": "Kitchen granite ki jagah quartz lagao; bedroom false ceiling hatao (take 1)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-002",
+    "language": "hindi_latin",
+    "text": "Kitchen se granite hata kar quartz lagao aur bedroom false ceiling hataiye",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-003",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling remove karo; kitchen granite badal ke quartz",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-004",
+    "language": "hindi_latin",
+    "text": "Kitchen granite ki jagah quartz lagao; bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-005",
+    "language": "hindi_latin",
+    "text": "Kitchen se granite hata kar quartz lagao aur bedroom false ceiling hataiye",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-006",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling remove karo; kitchen granite badal ke quartz (take 6)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-007",
+    "language": "hindi_latin",
+    "text": "Kitchen granite ki jagah quartz lagao; bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-008",
+    "language": "hindi_latin",
+    "text": "Kitchen se granite hata kar quartz lagao aur bedroom false ceiling hataiye",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-009",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling remove karo; kitchen granite badal ke quartz",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-010",
+    "language": "hindi_latin",
+    "text": "Kitchen granite ki jagah quartz lagao; bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-011",
+    "language": "hindi_latin",
+    "text": "Kitchen se granite hata kar quartz lagao aur bedroom false ceiling hataiye (take 11)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-012",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling remove karo; kitchen granite badal ke quartz",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-013",
+    "language": "hindi_latin",
+    "text": "Kitchen granite ki jagah quartz lagao; bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-014",
+    "language": "hindi_latin",
+    "text": "Kitchen se granite hata kar quartz lagao aur bedroom false ceiling hataiye",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-015",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling remove karo; kitchen granite badal ke quartz",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-016",
+    "language": "hindi_latin",
+    "text": "Kitchen granite ki jagah quartz lagao; bedroom false ceiling hatao (take 16)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-017",
+    "language": "hindi_latin",
+    "text": "Kitchen se granite hata kar quartz lagao aur bedroom false ceiling hataiye",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-018",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling remove karo; kitchen granite badal ke quartz",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-019",
+    "language": "hindi_latin",
+    "text": "Kitchen granite ki jagah quartz lagao; bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-020",
+    "language": "hindi_latin",
+    "text": "Kitchen se granite hata kar quartz lagao aur bedroom false ceiling hataiye",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-021",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling remove karo; kitchen granite badal ke quartz (take 21)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-022",
+    "language": "hindi_latin",
+    "text": "Kitchen granite ki jagah quartz lagao; bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-023",
+    "language": "hindi_latin",
+    "text": "Kitchen se granite hata kar quartz lagao aur bedroom false ceiling hataiye",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-024",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling remove karo; kitchen granite badal ke quartz",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_latin-025",
+    "language": "hindi_latin",
+    "text": "Kitchen granite ki jagah quartz lagao; bedroom false ceiling hatao",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-001",
+    "language": "telugu_latin",
+    "text": "Kitchen lo granite badulu quartz pettandi, bedroom false ceiling teeseyandi (take 1)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-002",
+    "language": "telugu_latin",
+    "text": "Kitchen granite place lo quartz pettandi; bedroom false ceiling remove cheyyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-003",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi and kitchen granite quartz ga marchandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-004",
+    "language": "telugu_latin",
+    "text": "Kitchen lo granite badulu quartz pettandi, bedroom false ceiling teeseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-005",
+    "language": "telugu_latin",
+    "text": "Kitchen granite place lo quartz pettandi; bedroom false ceiling remove cheyyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-006",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi and kitchen granite quartz ga marchandi (take 6)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-007",
+    "language": "telugu_latin",
+    "text": "Kitchen lo granite badulu quartz pettandi, bedroom false ceiling teeseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-008",
+    "language": "telugu_latin",
+    "text": "Kitchen granite place lo quartz pettandi; bedroom false ceiling remove cheyyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-009",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi and kitchen granite quartz ga marchandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-010",
+    "language": "telugu_latin",
+    "text": "Kitchen lo granite badulu quartz pettandi, bedroom false ceiling teeseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-011",
+    "language": "telugu_latin",
+    "text": "Kitchen granite place lo quartz pettandi; bedroom false ceiling remove cheyyandi (take 11)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-012",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi and kitchen granite quartz ga marchandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-013",
+    "language": "telugu_latin",
+    "text": "Kitchen lo granite badulu quartz pettandi, bedroom false ceiling teeseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-014",
+    "language": "telugu_latin",
+    "text": "Kitchen granite place lo quartz pettandi; bedroom false ceiling remove cheyyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-015",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi and kitchen granite quartz ga marchandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-016",
+    "language": "telugu_latin",
+    "text": "Kitchen lo granite badulu quartz pettandi, bedroom false ceiling teeseyandi (take 16)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-017",
+    "language": "telugu_latin",
+    "text": "Kitchen granite place lo quartz pettandi; bedroom false ceiling remove cheyyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-018",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi and kitchen granite quartz ga marchandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-019",
+    "language": "telugu_latin",
+    "text": "Kitchen lo granite badulu quartz pettandi, bedroom false ceiling teeseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-020",
+    "language": "telugu_latin",
+    "text": "Kitchen granite place lo quartz pettandi; bedroom false ceiling remove cheyyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-021",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi and kitchen granite quartz ga marchandi (take 21)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-022",
+    "language": "telugu_latin",
+    "text": "Kitchen lo granite badulu quartz pettandi, bedroom false ceiling teeseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-023",
+    "language": "telugu_latin",
+    "text": "Kitchen granite place lo quartz pettandi; bedroom false ceiling remove cheyyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-024",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi and kitchen granite quartz ga marchandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_latin-025",
+    "language": "telugu_latin",
+    "text": "Kitchen lo granite badulu quartz pettandi, bedroom false ceiling teeseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-001",
+    "language": "hindi_devanagari",
+    "text": "Kitchen granite की जगह quartz लगाइए और bedroom false ceiling हटाइए (take 1)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-002",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाएं; kitchen granite को quartz से बदलें",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-003",
+    "language": "hindi_devanagari",
+    "text": "Kitchen में granite हटाकर quartz लगाएं और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-004",
+    "language": "hindi_devanagari",
+    "text": "Kitchen granite की जगह quartz लगाइए और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-005",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाएं; kitchen granite को quartz से बदलें",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-006",
+    "language": "hindi_devanagari",
+    "text": "Kitchen में granite हटाकर quartz लगाएं और bedroom false ceiling हटाइए (take 6)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-007",
+    "language": "hindi_devanagari",
+    "text": "Kitchen granite की जगह quartz लगाइए और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-008",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाएं; kitchen granite को quartz से बदलें",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-009",
+    "language": "hindi_devanagari",
+    "text": "Kitchen में granite हटाकर quartz लगाएं और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-010",
+    "language": "hindi_devanagari",
+    "text": "Kitchen granite की जगह quartz लगाइए और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-011",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाएं; kitchen granite को quartz से बदलें (take 11)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-012",
+    "language": "hindi_devanagari",
+    "text": "Kitchen में granite हटाकर quartz लगाएं और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-013",
+    "language": "hindi_devanagari",
+    "text": "Kitchen granite की जगह quartz लगाइए और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-014",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाएं; kitchen granite को quartz से बदलें",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-015",
+    "language": "hindi_devanagari",
+    "text": "Kitchen में granite हटाकर quartz लगाएं और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-016",
+    "language": "hindi_devanagari",
+    "text": "Kitchen granite की जगह quartz लगाइए और bedroom false ceiling हटाइए (take 16)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-017",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाएं; kitchen granite को quartz से बदलें",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-018",
+    "language": "hindi_devanagari",
+    "text": "Kitchen में granite हटाकर quartz लगाएं और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-019",
+    "language": "hindi_devanagari",
+    "text": "Kitchen granite की जगह quartz लगाइए और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-020",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाएं; kitchen granite को quartz से बदलें",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-021",
+    "language": "hindi_devanagari",
+    "text": "Kitchen में granite हटाकर quartz लगाएं और bedroom false ceiling हटाइए (take 21)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-022",
+    "language": "hindi_devanagari",
+    "text": "Kitchen granite की जगह quartz लगाइए और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-023",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाएं; kitchen granite को quartz से बदलें",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-024",
+    "language": "hindi_devanagari",
+    "text": "Kitchen में granite हटाकर quartz लगाएं और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "hindi_devanagari-025",
+    "language": "hindi_devanagari",
+    "text": "Kitchen granite की जगह quartz लगाइए और bedroom false ceiling हटाइए",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-001",
+    "language": "telugu_script",
+    "text": "Kitchen granite బదులు quartz పెట్టండి, bedroom false ceiling తీసేయండి (take 1)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-002",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి; kitchen granite స్థానంలో quartz పెట్టండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-003",
+    "language": "telugu_script",
+    "text": "Kitchen granite ని quartz గా మార్చండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-004",
+    "language": "telugu_script",
+    "text": "Kitchen granite బదులు quartz పెట్టండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-005",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి; kitchen granite స్థానంలో quartz పెట్టండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-006",
+    "language": "telugu_script",
+    "text": "Kitchen granite ని quartz గా మార్చండి, bedroom false ceiling తీసేయండి (take 6)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-007",
+    "language": "telugu_script",
+    "text": "Kitchen granite బదులు quartz పెట్టండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-008",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి; kitchen granite స్థానంలో quartz పెట్టండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-009",
+    "language": "telugu_script",
+    "text": "Kitchen granite ని quartz గా మార్చండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-010",
+    "language": "telugu_script",
+    "text": "Kitchen granite బదులు quartz పెట్టండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-011",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి; kitchen granite స్థానంలో quartz పెట్టండి (take 11)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-012",
+    "language": "telugu_script",
+    "text": "Kitchen granite ని quartz గా మార్చండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-013",
+    "language": "telugu_script",
+    "text": "Kitchen granite బదులు quartz పెట్టండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-014",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి; kitchen granite స్థానంలో quartz పెట్టండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-015",
+    "language": "telugu_script",
+    "text": "Kitchen granite ని quartz గా మార్చండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-016",
+    "language": "telugu_script",
+    "text": "Kitchen granite బదులు quartz పెట్టండి, bedroom false ceiling తీసేయండి (take 16)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-017",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి; kitchen granite స్థానంలో quartz పెట్టండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-018",
+    "language": "telugu_script",
+    "text": "Kitchen granite ని quartz గా మార్చండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-019",
+    "language": "telugu_script",
+    "text": "Kitchen granite బదులు quartz పెట్టండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-020",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి; kitchen granite స్థానంలో quartz పెట్టండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-021",
+    "language": "telugu_script",
+    "text": "Kitchen granite ని quartz గా మార్చండి, bedroom false ceiling తీసేయండి (take 21)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-022",
+    "language": "telugu_script",
+    "text": "Kitchen granite బదులు quartz పెట్టండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-023",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి; kitchen granite స్థానంలో quartz పెట్టండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-024",
+    "language": "telugu_script",
+    "text": "Kitchen granite ని quartz గా మార్చండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "telugu_script-025",
+    "language": "telugu_script",
+    "text": "Kitchen granite బదులు quartz పెట్టండి, bedroom false ceiling తీసేయండి",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-001",
+    "language": "noisy_transcript",
+    "text": "kitchen grannit badulu quarts pettandi bed room fals seeling tiseseyandi (take 1)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-002",
+    "language": "noisy_transcript",
+    "text": "Kitchen gra night to quartz please, bedroom false ceil remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-003",
+    "language": "noisy_transcript",
+    "text": "kitchin granite quartz bedroom false ceiling remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-004",
+    "language": "noisy_transcript",
+    "text": "kitchen grannit badulu quarts pettandi bed room fals seeling tiseseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-005",
+    "language": "noisy_transcript",
+    "text": "Kitchen gra night to quartz please, bedroom false ceil remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-006",
+    "language": "noisy_transcript",
+    "text": "kitchin granite quartz bedroom false ceiling remove (take 6)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-007",
+    "language": "noisy_transcript",
+    "text": "kitchen grannit badulu quarts pettandi bed room fals seeling tiseseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-008",
+    "language": "noisy_transcript",
+    "text": "Kitchen gra night to quartz please, bedroom false ceil remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-009",
+    "language": "noisy_transcript",
+    "text": "kitchin granite quartz bedroom false ceiling remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-010",
+    "language": "noisy_transcript",
+    "text": "kitchen grannit badulu quarts pettandi bed room fals seeling tiseseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-011",
+    "language": "noisy_transcript",
+    "text": "Kitchen gra night to quartz please, bedroom false ceil remove (take 11)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-012",
+    "language": "noisy_transcript",
+    "text": "kitchin granite quartz bedroom false ceiling remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-013",
+    "language": "noisy_transcript",
+    "text": "kitchen grannit badulu quarts pettandi bed room fals seeling tiseseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-014",
+    "language": "noisy_transcript",
+    "text": "Kitchen gra night to quartz please, bedroom false ceil remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-015",
+    "language": "noisy_transcript",
+    "text": "kitchin granite quartz bedroom false ceiling remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-016",
+    "language": "noisy_transcript",
+    "text": "kitchen grannit badulu quarts pettandi bed room fals seeling tiseseyandi (take 16)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-017",
+    "language": "noisy_transcript",
+    "text": "Kitchen gra night to quartz please, bedroom false ceil remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-018",
+    "language": "noisy_transcript",
+    "text": "kitchin granite quartz bedroom false ceiling remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-019",
+    "language": "noisy_transcript",
+    "text": "kitchen grannit badulu quarts pettandi bed room fals seeling tiseseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-020",
+    "language": "noisy_transcript",
+    "text": "Kitchen gra night to quartz please, bedroom false ceil remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-021",
+    "language": "noisy_transcript",
+    "text": "kitchin granite quartz bedroom false ceiling remove (take 21)",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-022",
+    "language": "noisy_transcript",
+    "text": "kitchen grannit badulu quarts pettandi bed room fals seeling tiseseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-023",
+    "language": "noisy_transcript",
+    "text": "Kitchen gra night to quartz please, bedroom false ceil remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-024",
+    "language": "noisy_transcript",
+    "text": "kitchin granite quartz bedroom false ceiling remove",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "noisy_transcript-025",
+    "language": "noisy_transcript",
+    "text": "kitchen grannit badulu quarts pettandi bed room fals seeling tiseseyandi",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      },
+      {
+        "op": "REPLACE",
+        "room": "Kitchen",
+        "target_text": "countertop",
+        "replacement_text": "quartz"
+      }
+    ],
+    "requires_clarification": true
+  },
+  {
+    "id": "english-clear-01",
+    "language": "english",
+    "text": "Please remove bedroom false ceiling, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "english-clear-02",
+    "language": "english",
+    "text": "Please remove bedroom false ceiling, quantity 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "english-clear-03",
+    "language": "english",
+    "text": "Please remove bedroom false ceiling, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "english-clear-04",
+    "language": "english",
+    "text": "Please remove bedroom false ceiling, quantity 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "english-clear-05",
+    "language": "english",
+    "text": "Please remove bedroom false ceiling, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "hindi_latin-clear-01",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling hataiye, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "hindi_latin-clear-02",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling hataiye, quantity 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "hindi_latin-clear-03",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling hataiye, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "hindi_latin-clear-04",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling hataiye, quantity 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "hindi_latin-clear-05",
+    "language": "hindi_latin",
+    "text": "Bedroom false ceiling hataiye, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "telugu_latin-clear-01",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "telugu_latin-clear-02",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi, quantity 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "telugu_latin-clear-03",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "telugu_latin-clear-04",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi, quantity 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "telugu_latin-clear-05",
+    "language": "telugu_latin",
+    "text": "Bedroom false ceiling teeseyandi, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "hindi_devanagari-clear-01",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाइए, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "hindi_devanagari-clear-02",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाइए, quantity 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "hindi_devanagari-clear-03",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाइए, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "hindi_devanagari-clear-04",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाइए, quantity 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "hindi_devanagari-clear-05",
+    "language": "hindi_devanagari",
+    "text": "Bedroom false ceiling हटाइए, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "telugu_script-clear-01",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "telugu_script-clear-02",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి, quantity 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "telugu_script-clear-03",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "telugu_script-clear-04",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి, quantity 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "telugu_script-clear-05",
+    "language": "telugu_script",
+    "text": "Bedroom false ceiling తీసేయండి, quantity 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "noisy_transcript-clear-01",
+    "language": "noisy_transcript",
+    "text": "bed room fals seeling remove qty 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "noisy_transcript-clear-02",
+    "language": "noisy_transcript",
+    "text": "bed room fals seeling remove qty 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "noisy_transcript-clear-03",
+    "language": "noisy_transcript",
+    "text": "bed room fals seeling remove qty 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "noisy_transcript-clear-04",
+    "language": "noisy_transcript",
+    "text": "bed room fals seeling remove qty 120 sqft please",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  },
+  {
+    "id": "noisy_transcript-clear-05",
+    "language": "noisy_transcript",
+    "text": "bed room fals seeling remove qty 120 sqft",
+    "expected_ops": [
+      {
+        "op": "REMOVE",
+        "room": "Bedroom",
+        "target_text": "false ceiling"
+      }
+    ],
+    "requires_clarification": false
+  }
+]

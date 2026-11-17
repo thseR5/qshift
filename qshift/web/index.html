@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Qshift — Designer Agent Simulator</title><link rel="stylesheet" href="/static/style.css"></head>
+<body><main class="shell">
+<header><div class="brand"><div><strong>Qshift</strong><small>Make Every Change Count</small></div></div><span class="sim">SIMULATED CHAT · fictional quote data</span></header>
+<p><a href="/intake" style="color: inherit">Try the first-quote simulator</a></p>
+<div class="layout">
+<aside><div class="aside-title">YOUR WORKSPACE</div><label>Demo user</label><select id="user"><option value="demo-designer-token">Ravi · Designer</option><option value="demo-approver-token">Dev · Approver</option><option value="demo-owner-token">Asha · Owner</option></select><label>Active project</label><select id="project"></select><button id="pin">Pin project</button><div class="aside-note">All names, messages and quotation rates are fictional examples.</div><details class="setup"><summary>Project and rate setup</summary><input id="project-name" placeholder="New project name"><button id="create-project">Create project</button><p>Import templates: <a href="/templates/rate_card_template.csv">rates CSV</a> · <a href="/templates/rate_card_template.xlsx">rates XLSX</a> · <a href="/templates/quotation_template.csv">quote CSV</a> · <a href="/templates/quotation_template.xlsx">quote XLSX</a></p><label>Rate card (CSV/XLSX)</label><input id="rate-file" type="file" accept=".csv,.xlsx,.xlsm"><button id="upload-rate">Import as unverified</button><div id="rate-results"></div><label>Initial quotation (CSV/XLSX)</label><input id="quote-file" type="file" accept=".csv,.xlsx,.xlsm"><button id="upload-quote">Import to pinned project</button></details><button class="quiet" id="history">Version history</button><button class="quiet" id="memory">Project changes</button><div id="side-result"></div>
+  <details class="setup" id="founding-pricing">
+    <summary id="founding-price">Founding plan</summary>
+    <div id="founding-terms" aria-live="polite"></div>
+  </details>
+</aside>
+<section class="chat-wrap"><div class="chat-head"><div><strong>Qshift Assistant</strong><small><i></i> Private designer workspace</small></div><span>⋯</span></div><div class="chat" id="chat"><div class="date">TODAY · DEMO SESSION</div><div class="bubble assistant">Hello Ravi. Your active project will appear here. Share a scope change in English, Hindi, Telugu, or a mix.</div><div class="bubble assistant compact">Type help for chat commands, or try the voice transcript below.</div></div><div class="composer"><textarea id="message" placeholder="Describe a change or type help…"></textarea><button id="send" title="Submit change">➤</button></div><div class="quick"><button id="voice">▶ Use Telugu voice fixture</button><span>Mock transcript requires your confirmation before drafting.</span></div></section>
+<section class="review"><div class="review-title"><span>REVISION REVIEW</span><b id="status">No draft yet</b></div><div id="draft" class="empty">Your structured changes, rate choices and price difference will appear here before approval.</div></section>
+</div><footer>QShift · fictional demo workspace</footer></main><script src="/static/app.js"></script></body></html>

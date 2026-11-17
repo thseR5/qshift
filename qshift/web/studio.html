@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QShift Studio Workspace</title>
+  <link rel="stylesheet" href="/static/intake.css">
+  <script src="/static/intake.js" defer></script>
+  <script src="/static/studio.js" defer></script>
+</head>
+<body data-mode="studio">
+  <main>
+    <header><div><strong class="brand">QShift Studio</strong>
+      <span class="badge">SIMULATED · FICTIONAL DATA</span></div>
+      <button id="sign-out" hidden>Sign out</button>
+    </header>
+    <p id="status" role="status"></p>
+    <section id="sign-in">
+      <h1>Studio sign-in</h1>
+      <form id="login-form">
+        <label for="studio-slug">Studio</label>
+        <input id="studio-slug" autocomplete="organization" required maxlength="64">
+        <label for="studio-user">Username</label>
+        <input id="studio-user" autocomplete="username" required maxlength="64">
+        <label for="studio-password">Password</label>
+        <input id="studio-password" type="password" autocomplete="current-password" required maxlength="128">
+        <div class="toolbar"><button>Sign in</button></div>
+      </form>
+    </section>
+    <div id="signed-in" hidden>
+      <h1 id="studio-name"></h1>
+      <p id="member-name"></p>
+      <div class="workspace">
+        <section>
+          <h2>Projects</h2>
+          <form id="project-form">
+            <label for="project-name">Fictional project name</label>
+            <div class="row"><input id="project-name" required maxlength="160"><button>Create project</button></div>
+          </form>
+          <label for="project-picker">Project</label>
+          <select id="project-picker"></select>
+          <div class="toolbar">
+            <button id="create-chat">Start simulated client chat</button>
+            <button id="open-chat" class="secondary">Open existing chat</button>
+          </div>
+        </section>
+        <section>
+          <h2>Rate cards</h2>
+          <p>Use a fictional CSV or XLSX with the wardrobe and gypsum ceiling sample SKUs.</p>
+          <p><a href="/templates/whatsapp_rehearsal_rates.csv">Download fictional sample rates</a></p>
+          <form id="import-form">
+            <label for="rate-document">Fictional rate card</label>
+            <input id="rate-document" type="file" accept=".csv,.xlsx" required>
+            <button>Import</button>
+          </form>
+          <p id="import-result" aria-live="polite"></p>
+          <label for="card-picker">Rate card for this chat</label>
+          <select id="card-picker"></select>
+          <div id="rate-entries"></div>
+        </section>
+      </div>
+      <div class="workspace toolbar" id="workspace" hidden>
+        <section>
+          <h2 id="chat-heading">Simulated WhatsApp client chat</h2>
+          <div id="messages" class="messages" aria-live="polite"></div>
+          <form id="chat-form">
+            <label for="message">Fictional client message</label>
+            <div class="row">
+              <input id="message" required maxlength="1000" autocomplete="off">
+              <button>Send in simulator</button>
+            </div>
+            <button type="button" class="secondary" id="sample">Fill example message</button>
+          </form>
+        </section>
+        <section>
+          <h2>Designer review</h2>
+          <h3>Project brief</h3>
+          <p id="extraction"></p>
+          <dl id="brief"></dl>
+          <div id="review"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,7 @@
+*
+!Dockerfile
+!pyproject.toml
+!alembic.ini
+!alembic/
+!qshift/
+**/__pycache__/

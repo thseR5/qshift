@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QShift · First Quote Simulator</title>
+  <link rel="stylesheet" href="/static/intake.css">
+  <script src="/static/intake.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <div><strong class="brand">QShift</strong><span class="badge">SIMULATED · FICTIONAL DATA</span></div>
+      <a href="/">Revision simulator</a>
+    </header>
+    <h1>From client chat to first quote</h1>
+    <p>QShift gathers project details in chat and prepares a quote for designer review.</p>
+    <div class="toolbar">
+      <button id="start">Start new sample</button>
+      <button id="start-itemized" class="secondary">Start two-item AI sample</button>
+      <span id="status" role="status"></span>
+    </div>
+    <div class="toolbar">
+      <label for="role">Fictional team role</label>
+      <select id="role">
+        <option value="designer">Ravi · Designer</option>
+        <option value="approver">Dev · Approver</option>
+      </select>
+    </div>
+    <details class="rehearsal">
+      <summary>Simulated WhatsApp rehearsal</summary>
+      <p>Import the fictional rate card, verify its rates as an approver, then create a simulated client chat.</p>
+      <div class="row">
+        <button type="button" id="load-rates">Import fictional rate card</button>
+        <button type="button" id="verify-rates" disabled>Verify sample rates</button>
+        <button type="button" id="start-whatsapp" disabled>Start WhatsApp rehearsal</button>
+      </div>
+      <p id="rate-status" aria-live="polite"></p>
+    </details>
+    <div class="workspace" id="workspace" hidden>
+      <section aria-labelledby="chat-heading">
+        <h2 id="chat-heading">Simulated client chat</h2>
+        <div id="messages" class="messages" aria-live="polite"></div>
+        <form id="chat-form">
+          <label for="message">Fictional client message</label>
+          <div class="row">
+            <input id="message" required maxlength="1000" autocomplete="off">
+            <button type="submit">Send in simulator</button>
+          </div>
+          <button type="button" class="secondary" id="sample">Fill example message</button>
+        </form>
+      </section>
+      <section aria-labelledby="review-heading">
+        <h2 id="review-heading">Designer review</h2>
+        <h3>Project brief</h3>
+        <p id="extraction"></p>
+        <dl id="brief"></dl>
+        <div id="review"></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

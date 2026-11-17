@@ -1,0 +1,48 @@
+:root {
+  color-scheme: light;
+  color: #192c24;
+  background: #f3f5ef;
+  font: 16px/1.5 system-ui, sans-serif;
+}
+body { margin: 0; }
+main { max-width: 1120px; margin: auto; padding: 24px; }
+header, .toolbar, .row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+header { justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid #ccd7cf; }
+.brand { font-size: 1.25rem; margin-right: 12px; }
+.badge { color: #234f3d; font-size: .75rem; font-weight: 800; letter-spacing: .07em; }
+h1 { font: 500 clamp(2rem, 5vw, 3.4rem)/1.1 Georgia, serif; margin-bottom: 10px; }
+h2 { margin-top: 0; }
+a { color: #17513c; }
+.toolbar { margin: 24px 0 12px; }
+.workspace { display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px; }
+[hidden] { display: none !important; }
+section { min-width: 0; padding: 20px; border: 1px solid #ccd7cf; border-radius: 12px; background: #fff; }
+.messages { min-height: 200px; max-height: 435px; overflow: auto; background: #f2f8f3; padding: 14px; }
+.message { width: fit-content; max-width: 90%; border-radius: 10px; padding: 9px 12px; margin-bottom: 10px; background: #fff; overflow-wrap: anywhere; }
+.client { margin-left: auto; background: #d9eee0; }
+.message strong { display: block; font-size: .8rem; }
+.message:target { outline: 2px solid #216344; }
+form, label { display: block; margin-top: 10px; }
+input, select, button { box-sizing: border-box; font: inherit; border-radius: 6px; padding: 8px 10px; }
+input, select { border: 1px solid #789284; }
+#message { flex: 1 1 190px; min-width: 0; }
+button { background: #20533e; color: white; border: 1px solid #20533e; cursor: pointer; }
+button.secondary { background: white; color: #20533e; margin-top: 8px; }
+button:disabled { opacity: .6; cursor: default; }
+dl div { padding: 5px 0; border-bottom: 1px solid #e4eae5; }
+dt { font-weight: 650; }
+dd { margin-left: 0; }
+dd a { margin-left: 8px; font-size: .8rem; }
+#status { color: #3c5449; }
+.concept-panel { margin: 16px 0; border-top: 1px solid #e4eae5; padding-top: 10px; }
+.concept-panel summary { color: #17513c; cursor: pointer; font-weight: 650; }
+.concept { margin: 10px 0; }
+.concept img { display: block; width: 100%; height: auto; border-radius: 8px; }
+.concept figcaption { margin-top: 5px; font-size: .8rem; }
+.quote-line { border-bottom: 1px solid #e4eae5; padding: 10px 0 12px; }
+.quote-line p { margin: 4px 0; }
+.rehearsal { padding: 14px 16px; margin: 0 0 18px; border: 1px solid #ccd7cf; border-radius: 8px; }
+.rehearsal summary { color: #17513c; cursor: pointer; font-weight: 650; }
+@media (max-width: 740px) { .workspace { grid-template-columns: 1fr; } }

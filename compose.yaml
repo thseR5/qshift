@@ -1,0 +1,92 @@
+name: qshift
+
+x-app: &app
+  image: qshift-app:${QSHIFT_IMAGE_TAG:-local}
+  build: .
+  init: true
+  read_only: true
+  tmpfs:
+    - /tmp
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  volumes:
+    - ./deploy/rds-ca.pem:/run/qshift/rds-ca.pem:ro
+  restart: unless-stopped
+  logging: &logs
+    driver: json-file
+    options:
+      max-size: 5m
+      max-file: '3'
+
+services:
+  edge:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      QSHIFT_DOMAIN: ${QSHIFT_DOMAIN:?Set QSHIFT_DOMAIN in .env}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - certificates:/data
+      - caddy-config:/config
+    depends_on:
+      webhook:
+        condition: service_healthy
+    logging: *logs
+
+  webhook:
+    <<: *app
+    env_file:
+      - path: ./deploy/db.env
+        format: raw
+      - path: ./deploy/webhook.env
+        format: raw
+    command: [uvicorn, qshift.whatsapp_pilot:create_app, --factory, --host, 0.0.0.0, --port, '8765', --no-access-log]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/healthz', timeout=3).close()"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 10s
+
+  worker:
+    <<: *app
+    profiles: [delivery]
+    env_file:
+      - path: ./deploy/db.env
+        format: raw
+      - path: ./deploy/webhook.env
+        format: raw
+      - path: ./deploy/worker.env
+        format: raw
+    command: [python, -m, qshift.whatsapp_delivery, run]
+    depends_on:
+      webhook:
+        condition: service_healthy
+
+  review:
+    <<: *app
+    profiles: [review]
+    env_file:
+      - path: ./deploy/db.env
+        format: raw
+      - path: ./deploy/review.env
+        format: raw
+    environment:
+      QSHIFT_PRIVATE_REVIEW: 'true'
+    command: [uvicorn, qshift.api.main:app, --host, 0.0.0.0, --port, '8000', --no-access-log]
+    ports:
+      - '127.0.0.1:8000:8000'
+    networks:
+      - review
+
+networks:
+  review:
+
+volumes:
+  certificates:
+  caddy-config:
