@@ -96,3 +96,19 @@ def test_import_persists_firm_specific_catalogue_aliases(session):
     assert result["accepted"] == 1
     entry = session.scalar(select(RateEntry).where(RateEntry.sku == "NEW-3"))
     assert entry and entry.aliases == ["white stone", "quartz slab"]
+
+
+def test_import_accepts_explicit_mapping_override(session):
+    seed_demo(session)
+    owner = session.scalar(select(User).where(User.id == "user-owner"))
+    assert owner
+    result = import_rate_card(
+        session,
+        owner,
+        "rates.csv",
+        b"Code,Label,Measure,Amount\nNEW-4,Custom quartz,sqft,71000\n",
+        {"sku": "Code", "name": "Label", "unit": "Measure", "rate_paise": "Amount"},
+    )
+    assert result["accepted"] == 1
+    entry = session.scalar(select(RateEntry).where(RateEntry.sku == "NEW-4"))
+    assert entry and entry.name == "Custom quartz" and entry.rate_paise == 71000

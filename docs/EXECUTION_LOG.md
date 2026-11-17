@@ -129,6 +129,27 @@ Full modified-module mypy check was also run with:
 
 The errors are existing repository-wide typing debt and missing third-party stubs (plus transitive modules imported by the checked files); the configured `make lint` gate remains green for `qshift/engine` and `qshift/approval`.
 
+## 2026-11-17 — V6.2 onboarding mapping slice
+
+Changed:
+
+- Added explicit mapping overrides to rate-card and quotation import services and multipart API endpoints.
+- Added Studio preview/confirm mapping controls for nonstandard CSV/XLSX headers.
+- Added alias and explicit-mapping regression tests; validated browser JavaScript syntax with `node --check`.
+
+Verification:
+
+```text
+make test
+52 passed, 1 warning; engine/approval coverage remained 94%
+
+make lint
+Ruff passed; configured engine/approval mypy passed
+
+node --check qshift/web/studio.js
+passed
+```
+
 ## Next entry format
 
 ```text

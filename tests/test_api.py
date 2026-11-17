@@ -1,3 +1,4 @@
+import json
 from collections.abc import Generator
 from hashlib import sha256
 from pathlib import Path
@@ -70,6 +71,25 @@ def test_simulated_api_auth_and_scope(client: TestClient) -> None:
     assert preview.status_code == 200
     assert preview.json()["mapping"]["rate_paise"] == "Unit Price"
     assert preview.json()["writes_database"] is False
+
+    mapped = client.post(
+        "/api/imports/rate-card",
+        headers=headers,
+        data={
+            "mapping": json.dumps(
+                {"sku": "Code", "name": "Label", "unit": "Measure", "rate_paise": "Amount"}
+            )
+        },
+        files={
+            "file": (
+                "mapped.csv",
+                b"Code,Label,Measure,Amount\nM-1,Quartz slab,sqft,71000\n",
+                "text/csv",
+            )
+        },
+    )
+    assert mapped.status_code == 200
+    assert mapped.json()["entries"][0]["sku"] == "M-1"
 
 
 def test_chat_can_cancel_open_revision_without_approval(client: TestClient) -> None:

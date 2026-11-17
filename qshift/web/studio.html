@@ -51,9 +51,27 @@
           <form id="import-form">
             <label for="rate-document">Fictional rate card</label>
             <input id="rate-document" type="file" accept=".csv,.xlsx" required>
-            <button>Import</button>
+            <button>Preview mapping</button>
           </form>
           <p id="import-result" aria-live="polite"></p>
+          <div id="rate-mapping-panel" class="mapping-panel" hidden>
+            <h3>Review rate-card columns</h3>
+            <p>Confirm how the uploaded columns map to Qshift fields. This preview does not write data.</p>
+            <div id="rate-mapping-fields"></div>
+            <button type="button" id="confirm-rate-import">Confirm rate-card import</button>
+          </div>
+          <form id="quotation-import-form">
+            <label for="quotation-document">Fictional quotation</label>
+            <input id="quotation-document" type="file" accept=".csv,.xlsx" required>
+            <button>Preview quotation mapping</button>
+          </form>
+          <p id="quotation-import-result" aria-live="polite"></p>
+          <div id="quotation-mapping-panel" class="mapping-panel" hidden>
+            <h3>Review quotation columns</h3>
+            <p>Choose the room, verified SKU and quantity columns before importing.</p>
+            <div id="quotation-mapping-fields"></div>
+            <button type="button" id="confirm-quotation-import">Confirm quotation import</button>
+          </div>
           <label for="card-picker">Rate card for this chat</label>
           <select id="card-picker"></select>
           <div id="rate-entries"></div>

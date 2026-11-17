@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import os
 from decimal import Decimal
 from typing import Annotated, Literal
 
-from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
@@ -579,10 +580,20 @@ def pdf(version_id: str, session: SessionDep, user: UserDep) -> Response:
 
 @app.post("/api/imports/rate-card")
 def rate_card_import(
-    session: SessionDep, user: UserDep, file: Annotated[UploadFile, File()]
+    session: SessionDep,
+    user: UserDep,
+    file: Annotated[UploadFile, File()],
+    mapping: Annotated[str | None, Form()] = None,
 ) -> dict:
     try:
-        return import_rate_card(session, user, file.filename or "upload", file.file.read())
+        selected = json.loads(mapping) if mapping else None
+        if selected is not None and not isinstance(selected, dict):
+            raise ValueError("Mapping must be a JSON object")
+        return import_rate_card(
+            session, user, file.filename or "upload", file.file.read(), selected
+        )
+    except json.JSONDecodeError as exc:
+        raise HTTPException(422, "Mapping must be valid JSON") from exc
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
 
@@ -604,11 +615,17 @@ def quotation_import(
     session: SessionDep,
     user: UserDep,
     file: Annotated[UploadFile, File()],
+    mapping: Annotated[str | None, Form()] = None,
 ) -> dict:
     try:
+        selected = json.loads(mapping) if mapping else None
+        if selected is not None and not isinstance(selected, dict):
+            raise ValueError("Mapping must be a JSON object")
         return import_quotation(
-            session, user, project_id, file.filename or "upload", file.file.read()
+            session, user, project_id, file.filename or "upload", file.file.read(), selected
         )
+    except json.JSONDecodeError as exc:
+        raise HTTPException(422, "Mapping must be valid JSON") from exc
     except LookupError as exc:
         raise HTTPException(404, str(exc)) from exc
     except ValueError as exc:

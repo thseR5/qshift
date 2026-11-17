@@ -391,7 +391,10 @@ def _header_key(value: object) -> str:
 
 
 def _read_tabular(
-    filename: str, content: bytes, aliases: dict[str, str]
+    filename: str,
+    content: bytes,
+    aliases: dict[str, str],
+    selected_mapping: dict[str, str] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, str], list[str]]:
     """Read a spreadsheet without executing formulas or changing persisted state."""
     raw_rows: list[dict[str, Any]]
@@ -413,12 +416,28 @@ def _read_tabular(
     else:
         raise ValueError("Only CSV and XLSX are supported")
 
-    mapping: dict[str, str] = {}
+    mapping: dict[str, str] = dict(selected_mapping or {})
+    if selected_mapping:
+        allowed = set(aliases.values())
+        invalid = {
+            canonical: source
+            for canonical, source in selected_mapping.items()
+            if canonical not in allowed or source not in raw_headers
+        }
+        if invalid:
+            raise ValueError("Mapping contains an unknown field or source column")
     rows: list[dict[str, Any]] = []
     for raw in raw_rows:
         normalized: dict[str, Any] = {}
         for key, value in raw.items():
-            canonical = aliases.get(_header_key(key), _header_key(key))
+            canonical = next(
+                (
+                    field
+                    for field, source in (selected_mapping or {}).items()
+                    if source == str(key)
+                ),
+                aliases.get(_header_key(key), _header_key(key)),
+            )
             if canonical in aliases.values() and canonical not in mapping:
                 mapping[canonical] = str(key)
             normalized[canonical] = value
@@ -464,8 +483,14 @@ def _aliases(value: Any) -> list[str]:
     return [part.strip() for part in re.split(r"[,;|]", str(value)) if part.strip()][:20]
 
 
-def import_rate_card(session: Session, user: User, filename: str, content: bytes) -> dict[str, Any]:
-    rows, mapping, _ = _read_tabular(filename, content, RATE_HEADER_ALIASES)
+def import_rate_card(
+    session: Session,
+    user: User,
+    filename: str,
+    content: bytes,
+    mapping_override: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    rows, mapping, _ = _read_tabular(filename, content, RATE_HEADER_ALIASES, mapping_override)
     errors: list[str] = []
     warnings: list[str] = []
     candidate_rates = sorted(
@@ -562,7 +587,12 @@ def verify_rate(session: Session, user: User, entry_id: str) -> None:
 
 
 def import_quotation(
-    session: Session, user: User, project_id: str, filename: str, content: bytes
+    session: Session,
+    user: User,
+    project_id: str,
+    filename: str,
+    content: bytes,
+    mapping_override: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Import a simple itemized CSV/XLSX quotation after matching verified SKUs."""
     require_project(session, user, project_id)
@@ -581,7 +611,7 @@ def import_quotation(
     )
     if card is None:
         raise ValueError("Import a rate card before importing a quotation")
-    rows, mapping, _ = _read_tabular(filename, content, QUOTE_HEADER_ALIASES)
+    rows, mapping, _ = _read_tabular(filename, content, QUOTE_HEADER_ALIASES, mapping_override)
     errors: list[str] = []
     lines: list[dict[str, Any]] = []
     for row_num, raw in enumerate(rows, start=2):

@@ -1,4 +1,6 @@
 let cards = [];
+let pendingRateImport = null;
+let pendingQuotationImport = null;
 
 function optionList(element, rows, label, selected) {
   element.replaceChildren();
@@ -75,18 +77,89 @@ el('project-form').onsubmit = run(async () => {
   await refreshStudio(project.id);
 });
 
-el('import-form').onsubmit = run(async () => {
-  const file = el('rate-document').files[0];
+function renderMapping(panelId, fieldsId, preview, requiredFields) {
+  const fields = el(fieldsId);
+  fields.replaceChildren();
+  const options = [''].concat(preview.headers);
+  const allFields = [...requiredFields, 'name', 'category', 'aliases', 'gst_percent', 'gst_bps']
+    .filter((field, index, values) => values.indexOf(field) === index);
+  for (const field of allFields) {
+    const row = document.createElement('label');
+    row.className = 'mapping-row';
+    addText(row, 'span', field + (requiredFields.includes(field) ? ' *' : ''));
+    const select = document.createElement('select');
+    select.dataset.field = field;
+    for (const header of options) addText(select, 'option', header || '— not mapped —').value = header;
+    select.value = preview.mapping[field] || '';
+    row.append(select);
+    fields.append(row);
+  }
+  el(panelId).hidden = false;
+}
+
+function selectedMapping(fieldsId) {
+  const mapping = {};
+  for (const select of el(fieldsId).querySelectorAll('select')) {
+    if (select.value) mapping[select.dataset.field] = select.value;
+  }
+  return mapping;
+}
+
+async function previewFile(file, endpoint, panelId, fieldsId, requiredFields) {
   const form = new FormData();
   form.append('file', file, file.name);
-  const response = await fetch('/api/imports/rate-card', {method: 'POST', body: form});
+  const response = await fetch(endpoint, {method: 'POST', headers: headers(), body: form});
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.detail || 'Preview could not be created.');
+  if (result.missing_required.length) {
+    throw new Error('Missing required fields: ' + result.missing_required.join(', '));
+  }
+  renderMapping(panelId, fieldsId, result, requiredFields);
+  return result;
+}
+
+el('import-form').onsubmit = run(async () => {
+  const file = el('rate-document').files[0];
+  if (!file) throw new Error('Choose a rate card first.');
+  pendingRateImport = file;
+  await previewFile(file, '/api/imports/rate-card/preview', 'rate-mapping-panel', 'rate-mapping-fields', ['sku', 'unit', 'rate_paise']);
+  el('import-result').textContent = 'Mapping preview ready. Review the fields, then confirm the import.';
+});
+
+el('confirm-rate-import').onclick = run(async () => {
+  if (!pendingRateImport) throw new Error('Preview a rate card first.');
+  const form = new FormData();
+  form.append('file', pendingRateImport, pendingRateImport.name);
+  form.append('mapping', JSON.stringify(selectedMapping('rate-mapping-fields')));
+  const response = await fetch('/api/imports/rate-card', {method: 'POST', headers: headers(), body: form});
   const result = await response.json();
   if (!response.ok) throw new Error(result.detail || 'Import could not be completed.');
-  el('import-result').textContent = [
-    result.accepted + ' rates imported as unverified.',
-    ...result.errors, ...result.warnings,
-  ].join(' ');
+  el('import-result').textContent = [result.accepted + ' rates imported as unverified.', ...result.errors, ...result.warnings].join(' ');
+  el('rate-mapping-panel').hidden = true;
+  pendingRateImport = null;
   await refreshStudio(undefined, result.rate_card_id);
+});
+
+el('quotation-import-form').onsubmit = run(async () => {
+  const file = el('quotation-document').files[0];
+  if (!file) throw new Error('Choose a quotation first.');
+  pendingQuotationImport = file;
+  await previewFile(file, '/api/imports/quotation/preview', 'quotation-mapping-panel', 'quotation-mapping-fields', ['room', 'sku', 'quantity']);
+  el('quotation-import-result').textContent = 'Mapping preview ready. Review the fields, then confirm the import.';
+});
+
+el('confirm-quotation-import').onclick = run(async () => {
+  if (!pendingQuotationImport || !el('project-picker').value) throw new Error('Choose a project and preview a quotation first.');
+  const form = new FormData();
+  form.append('file', pendingQuotationImport, pendingQuotationImport.name);
+  form.append('mapping', JSON.stringify(selectedMapping('quotation-mapping-fields')));
+  const response = await fetch('/api/imports/quotation?project_id=' + encodeURIComponent(el('project-picker').value), {method: 'POST', headers: headers(), body: form});
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.detail || 'Quotation import could not be completed.');
+  el('quotation-import-result').textContent = result.valid_rows + ' quotation rows imported into the selected project.';
+  el('quotation-mapping-panel').hidden = true;
+  pendingQuotationImport = null;
+  await refreshStudio();
 });
 
 el('card-picker').onchange = el('project-picker').onchange = showRates;

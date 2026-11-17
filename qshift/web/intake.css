@@ -45,4 +45,9 @@ dd a { margin-left: 8px; font-size: .8rem; }
 .quote-line p { margin: 4px 0; }
 .rehearsal { padding: 14px 16px; margin: 0 0 18px; border: 1px solid #ccd7cf; border-radius: 8px; }
 .rehearsal summary { color: #17513c; cursor: pointer; font-weight: 650; }
+.mapping-panel { border: 1px solid #ccd7cf; border-radius: 8px; padding: 12px; margin: 12px 0; background: #f8fbf8; }
+.mapping-panel p { font-size: .9rem; color: #3c5449; }
+.mapping-row { display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: center; margin: 8px 0; }
+.mapping-row select { width: 100%; }
 @media (max-width: 740px) { .workspace { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .mapping-row { grid-template-columns: 1fr; gap: 4px; } }

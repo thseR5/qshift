@@ -12,11 +12,12 @@
 - Added a versioned 12-case live evaluation set and `make eval-live` runner with precise offline blocker reporting.
 - Added `docs/REVISION_AI_EVALUATION.md` so unavailable live-model results are visible instead of replaced with mock scores.
 - Added regression tests for provider selection, schema validation, aliases, quantity changes and corrections.
+- Added Studio UI mapping previews for rate cards and quotations, with explicit column confirmation before database writes.
 
 ## Immediate next work
 
 1. Run `make eval-live` on a local Ollama installation with `qwen3:1.7b`; review ten concrete examples and measure latency, matching and clarification metrics.
-2. Add richer import mapping UI for aliases and candidate review.
+2. Add unmatched-item candidate review after quotation import.
 3. Expand multilingual holdout coverage with founder-reviewed fictional examples.
 4. Add production identity, retention, monitoring, restore and document-access gates before any real-firm data.
 
