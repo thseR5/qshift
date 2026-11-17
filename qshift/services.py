@@ -814,6 +814,11 @@ def _normalise_operations(result: ChangeExtraction | list[dict[str, Any]]) -> li
 
 
 def _model_context(base: QuoteVersion, entries: Sequence[RateEntry]) -> dict[str, Any]:
+    if os.getenv("QSHIFT_CHANGE_CONTEXT_MODE", "minimal").casefold() != "full":
+        # Extraction does not need prices or internal line IDs. Deterministic service-layer
+        # resolution receives the complete tenant-scoped quote after the model responds.
+        # Keeping those values out prevents a small model from copying unrelated lines.
+        return {}
     return {
         "quotation_lines": [
             {

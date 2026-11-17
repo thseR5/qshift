@@ -86,6 +86,8 @@ For the browser version, start `make run`, pin Sharma Residence, choose **Use Te
 - `make lint` — run Ruff and strict mypy on the engine/approval packages.
 - `make eval` — report offline synthetic fixture scores by language.
 - `make eval-live` — run the 55-case real-model evaluation when Ollama is configured; use `QSHIFT_EVAL_START`/`QSHIFT_EVAL_LIMIT` for a slice.
+- `make eval-forensics` — decompose a completed live JSONL run into intent, operation, target, room and clarification metrics.
+- `make diagnose-generation` — run a small controlled comparison of context and output-token settings; it does not tune or download a model.
 - `make demo` — run the repeatable offline scenario.
 - `make clean-demo` — delete only local demo database and generated demo PDFs.
 

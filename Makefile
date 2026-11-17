@@ -2,7 +2,7 @@ BOOTSTRAP_PYTHON ?= python3.11
 PYTHON ?= .venv/bin/python
 PIP = $(PYTHON) -m pip
 
-.PHONY: setup run run-whatsapp-pilot whatsapp-test migrate test lint eval eval-live demo webhook-demo client-demo studio clean-demo
+.PHONY: setup run run-whatsapp-pilot whatsapp-test migrate test lint eval eval-live eval-forensics diagnose-generation demo webhook-demo client-demo studio clean-demo
 setup:
 	$(BOOTSTRAP_PYTHON) -m venv .venv
 	$(PIP) install -e '.[dev]'
@@ -31,6 +31,12 @@ eval:
 
 eval-live:
 	$(PYTHON) -m evals.run_live_eval
+
+eval-forensics:
+	$(PYTHON) -m evals.run_forensics
+
+diagnose-generation:
+	$(PYTHON) -m evals.run_generation_diagnostics
 
 demo:
 	$(PYTHON) -m qshift.demo

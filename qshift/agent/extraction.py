@@ -193,10 +193,12 @@ class OllamaChangeLLM:
         self.model = model if model is not None else _ollama_model()
         self.last_raw: dict[str, Any] | None = None
         self.last_raw_text: str | None = None
+        self.last_meta: dict[str, Any] | None = None
 
     def extract(self, text: str, context: dict[str, Any] | None = None) -> ChangeExtraction:
         self.last_raw = None
         self.last_raw_text = None
+        self.last_meta = None
         schema = ModelChangeExtraction.model_json_schema()
         payload = {
             "model": self.model,
@@ -229,6 +231,18 @@ class OllamaChangeLLM:
         try:
             with build_opener(ProxyHandler({})).open(request, timeout=timeout) as response:
                 body = json.load(response)
+            self.last_meta = {
+                key: body[key]
+                for key in (
+                    "done",
+                    "done_reason",
+                    "total_duration",
+                    "load_duration",
+                    "prompt_eval_count",
+                    "eval_count",
+                )
+                if key in body
+            }
             content = body["message"]["content"]
             self.last_raw_text = content
             self.last_raw = json.loads(content)

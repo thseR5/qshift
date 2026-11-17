@@ -33,7 +33,7 @@ def main() -> int:
     wrong_targets = 0
     missing_changes = 0
     expected_total = 0
-    context = {
+    full_context = {
         "quotation_lines": [
             {"line_id": "kitchen-counter", "room": "Kitchen", "category": "Countertop", "description": "Granite countertop", "sku": "COUNTER-GRANITE", "quantity": "40", "unit": "sqft"},
             {"line_id": "guest-ceiling", "room": "Guest Bedroom", "category": "Ceiling", "description": "Gypsum false ceiling", "sku": "FALSE-CEILING-GYPSUM", "quantity": "120", "unit": "sqft"},
@@ -41,6 +41,7 @@ def main() -> int:
         ],
         "verified_catalogue": [],
     }
+    context = full_context if os.getenv("QSHIFT_EVAL_CONTEXT_MODE", "full") == "full" else {}
     for case in cases:
         started = time.perf_counter()
         try:
@@ -53,6 +54,7 @@ def main() -> int:
                 "expected_ops": case["expected_ops"],
                 "raw_output": model.last_raw,
                 "raw_output_text": model.last_raw_text,
+                "response_meta": model.last_meta,
                 "normalized_output": None,
                 "validation_error": str(exc),
                 "latency_ms": round((time.perf_counter() - started) * 1000, 1),
@@ -76,6 +78,7 @@ def main() -> int:
                         "expected_ops": case["expected_ops"],
                         "raw_output": model.last_raw,
                         "raw_output_text": model.last_raw_text,
+                        "response_meta": model.last_meta,
                         "normalized_output": result.model_dump(mode="json"),
                         "validation_error": None,
                         "latency_ms": round(elapsed, 1),

@@ -237,3 +237,32 @@ files and only seeded fictional Demo Interiors data:
 
 The second and third outcomes demonstrate the safety boundary: uncertain real-model proposals
 remain drafts and cannot create approved documents.
+
+## 2026-11-17 — V6.4 forensic scorer and controlled context comparison
+
+Changed:
+
+- Added `evals/forensics.py` with auditable one-to-one operation alignment and separate intent,
+  operation-type, target, room, clarification and fully-correct metrics.
+- Added `evals/run_forensics.py`, a 55-case table generator that preserves the original strict
+  scorer as historical evidence and reports context coverage.
+- Added locked v2 development, validation and holdout fixtures under
+  `qshift/fixtures/revision_eval_v2/`; the new holdout has not been used for tuning.
+- Added bounded generation diagnostics and captured Ollama `done_reason`/token metadata.
+- Made minimal model context the service default; full quotation context remains opt-in.
+- Added Slurm preparation scripts that refuse submission without explicit authorization and do
+  not download models or expose Ollama outside loopback.
+
+Results:
+
+```text
+Full-context V6.3 historical strict F1: 0.029; forensic operation-type F1: 0.511; target F1: 0.321
+Minimal-context V6.4 strict F1: 0.037; forensic operation-type F1: 0.593; target F1: 0.481
+Fully-correct case rate: 0.109 in both runs
+Context coverage: 23/55 gold cases had a unique target in the historical three-line context
+Controlled num_predict 350 vs 1200: identical six-case operation-type F1 (0.500)
+No-context diagnostic: operation-type F1 0.571 on the same six cases
+```
+
+Evidence and the full per-case table are in `docs/REVISION_AI_FORENSICS_V64.md`. No university
+GPU job was submitted because Slurm authorization and site resource values are not confirmed.

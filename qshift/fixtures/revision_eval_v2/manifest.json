@@ -1,0 +1,15 @@
+{
+  "benchmark_version": "revision-eval-v2",
+  "schema_version": 1,
+  "files": {
+    "development": "development.json",
+    "validation": "validation.json",
+    "holdout": "holdout.json"
+  },
+  "context_fixture": "v1-three-line-fictional-quotation",
+  "prompt_revision": "V6.3-model-only-schema",
+  "model_revision": "not-run",
+  "runtime_revision": "not-run",
+  "holdout_status": "locked-before-v2-tuning",
+  "notes": "Fictional, non-identifying requests only. Do not edit expected labels after observing predictions."
+}

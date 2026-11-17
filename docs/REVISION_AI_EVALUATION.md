@@ -31,6 +31,10 @@ These are genuine model results, not fallback or manually corrected predictions.
 operation scores block a real-customer release. The deterministic service still rejected
 uncertain targets and kept drafts in `NEEDS_CLARIFICATION`; it did not approve an unsafe quote.
 
+The V6.4 forensic decomposition and context comparison are recorded in
+`docs/REVISION_AI_FORENSICS_V64.md`. The service now uses minimal model context by default;
+set `QSHIFT_CHANGE_CONTEXT_MODE=full` only for an explicit historical comparison.
+
 | Case | Language | Expected behavior | Actual live result |
 |---|---|---|---|
 | en-01 | English | MODIFY guest-bedroom wardrobe dimensions | MODIFY `guest bedroom wardrobe`; missing dimensions; needs clarification |
