@@ -4,11 +4,15 @@
 
 Required: reproducible local environment, deterministic pricing and approval regressions, tenant-isolation tests and fictional data only.
 
-Status: **SUBSTANTIALLY PRESENT**. The current run has 58 passing tests and deterministic financial/approval regressions remain green. Full application type-check and production security are not clean.
+Status: **SUBSTANTIALLY PRESENT**. The current run has 60 passing tests and deterministic financial/approval regressions remain green. Full application type-check and production security are not clean.
 
 V7 WhatsApp-native work is present in the simulated adapter: tenant-bound staff enrollment,
 project lists, WhatsApp review summaries, one-time token approval/rejection commands and a
 pending approved-PDF delivery worker. These paths are still explicitly SIMULATED.
+
+V8 adds generic tenant-scoped provider identity records, inbound event persistence, outbound
+delivery state records and bounded CSV/XLSX media validation. These are local code paths, not
+proof of live Meta or AWS operation.
 
 ## Gate B — client demonstration
 

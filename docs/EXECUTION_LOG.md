@@ -285,3 +285,16 @@ exit code 2 before invoking `sbatch`.
   `approve <token>` -> pending PDF worker) returned `pdf_state=accepted`, generated 11,572 PDF
   bytes, and verified the `%PDF-` header. No network sender was used.
 
+## 2026-11-17 — V8 identity and delivery-boundary slice
+
+- Added tenant-scoped WhatsApp business-account, phone-number, staff-enrollment, customer-contact,
+  project-association, inbound-event and outbound-delivery records with migration `0012`.
+- The receive path now resolves account + phone + sender to an enrolled tenant identity; unknown
+  senders cannot inherit the fictional pilot tenant. Inbound provider events are persisted before
+  processing and outbound provider IDs/statuses have a durable state model.
+- Added bounded official-media helpers for CSV/XLSX signature/MIME/size validation. The simulated
+  adapter still does not download Meta media.
+- Added V8 launch status, customer journey, live-integration boundary, AWS runbook, security gates,
+  AI qualification, onboarding, incident, pricing and founder-action documents.
+- Verification: `make test` — 60 passed, 1 warning. `make lint` — Ruff and configured mypy passed.
+

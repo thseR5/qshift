@@ -17,10 +17,11 @@ from qshift.agent.chat import respond_to_message
 from qshift.agent.local_model import LocalModelUnavailable
 from qshift.db import engine
 from qshift.intake import add_client_message, start_sample
-from qshift.models import Draft, Firm, User, now_utc
+from qshift.models import Draft, Firm, MessageEvent, OutboundDelivery, User, now_utc
 from qshift.services import approve_draft, hash_text, issue_approval_token, seed_demo
+from qshift.whatsapp_identity import register_staff_identity, resolve_staff_sender
 from qshift.whatsapp_store import Conversation, Receipt, lock_conversation
-from qshift.whatsapp_webhook import IncomingText, WebhookCredentials, webhook_routes
+from qshift.whatsapp_webhook import IncomingStatus, IncomingText, WebhookCredentials, webhook_routes
 
 PILOT_FIRM = "firm-demo"
 PILOT_DESIGNER = "user-designer"
@@ -154,6 +155,13 @@ def record_staff_consent(
         )
         if user is None:
             raise ValueError("Use a fictional OWNER, APPROVER or DESIGNER user for enrollment")
+        register_staff_identity(
+            session,
+            credentials,
+            firm_id=PILOT_FIRM,
+            user_id=user.id,
+            consent_reference=reference,
+        )
         conversation = lock_conversation(session, identity)
         assert conversation is not None
         if conversation.delivery_opted_out or conversation.consent_recorded_at is not None:
@@ -201,7 +209,11 @@ def pilot_reply(session: Session, user: User, conversation: Conversation, messag
 
 
 def process_next_incoming(database: Engine, credentials: WebhookCredentials) -> bool:
-    identity = (PILOT_FIRM, enrollment_key(credentials))
+    with Session(database) as session:
+        resolved = resolve_staff_sender(session, credentials)
+    if resolved is None:
+        return False
+    identity = (resolved.firm_id, enrollment_key(credentials))
     pending = (
         select(Receipt)
         .where(
@@ -240,22 +252,20 @@ def create_receive_app(
     health_endpoint: bool = True,
     durable_inbox: bool = False,
 ) -> FastAPI:
-    identity = (PILOT_FIRM, enrollment_key(credentials))
-
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
         with Session(database) as session:
-            require_fictional_designer(session)
-            session.get(Conversation, identity)
-            session.scalar(
-                select(Receipt.inbound_text)
-                .where(Receipt.firm_id == identity[0], Receipt.enrollment_key == identity[1])
-                .limit(1)
-            )
+            # Startup only checks database connectivity. Sender identity is resolved per event;
+            # an unknown sender must not inherit a default tenant.
+            session.scalar(select(1))
         yield
 
     def handle_messages(messages: list[IncomingText]) -> None:
         with Session(database) as session, session.begin():
+            resolved = resolve_staff_sender(session, credentials)
+            if resolved is None:
+                return
+            identity = (resolved.firm_id, enrollment_key(credentials))
             conversation = lock_conversation(session, identity)
             if conversation is None or conversation.delivery_opted_out:
                 return
@@ -280,6 +290,21 @@ def create_receive_app(
                 digest = hash_text(message.message_id)
                 if session.get(Receipt, (*identity, digest)) is not None:
                     continue
+                event_id = hash_text(f"whatsapp-event:{identity[0]}:{message.message_id}")
+                if session.get(MessageEvent, event_id) is not None:
+                    continue
+                session.add(
+                    MessageEvent(
+                        id=event_id,
+                        firm_id=resolved.firm_id,
+                        phone_number_id=resolved.phone_number_id,
+                        provider_message_id=message.message_id,
+                        direction="inbound",
+                        event_type="document" if message.body.startswith("document ") else "text",
+                        payload_sha256=hash_text(message.body),
+                        processing_state="queued" if durable_inbox else "processing",
+                    )
+                )
                 try:
                     reply = (
                         ""
@@ -303,6 +328,25 @@ def create_receive_app(
                     )
                 )
                 session.flush()
+                event = session.get(MessageEvent, event_id)
+                if event is not None:
+                    event.processing_state = "queued" if durable_inbox else "completed"
+
+    def handle_statuses(statuses: list[IncomingStatus]) -> None:
+        allowed = {"queued", "processing", "accepted", "sent", "delivered", "read", "failed"}
+        with Session(database) as session, session.begin():
+            for status in statuses:
+                mapped = status.status if status.status in allowed else "unknown"
+                delivery = session.scalar(
+                    select(OutboundDelivery).where(
+                        OutboundDelivery.firm_id == PILOT_FIRM,
+                        OutboundDelivery.provider_message_id == status.message_id,
+                    )
+                )
+                if delivery is not None:
+                    delivery.state = mapped
+                    if mapped == "failed":
+                        delivery.last_error = "Provider reported failure"
 
     app = FastAPI(
         title="QShift WhatsApp receive pilot",
@@ -322,7 +366,7 @@ def create_receive_app(
 
     if health_endpoint:
         app.add_api_route("/healthz", health, include_in_schema=False)
-    app.include_router(webhook_routes(credentials, handle_messages))
+    app.include_router(webhook_routes(credentials, handle_messages, handle_statuses))
     return app
 
 

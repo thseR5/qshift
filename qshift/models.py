@@ -44,6 +44,101 @@ class User(Base):
     demo_token_hash: Mapped[str] = mapped_column(String(64), unique=True)
 
 
+class WhatsAppBusinessAccount(Base):
+    """Tenant-scoped provider account identity; credentials never live here."""
+
+    __tablename__ = "whatsapp_business_accounts"
+    __table_args__ = (UniqueConstraint("firm_id", "provider_account_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    firm_id: Mapped[str] = mapped_column(ForeignKey("firms.id"), index=True)
+    provider_account_id: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(20), default="pending")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+
+class WhatsAppPhoneNumber(Base):
+    __tablename__ = "whatsapp_phone_numbers"
+    __table_args__ = (UniqueConstraint("provider_phone_number_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    firm_id: Mapped[str] = mapped_column(ForeignKey("firms.id"), index=True)
+    business_account_id: Mapped[str] = mapped_column(
+        ForeignKey("whatsapp_business_accounts.id"), index=True
+    )
+    provider_phone_number_id: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(20), default="pending")
+
+
+class StaffEnrollment(Base):
+    __tablename__ = "whatsapp_staff_enrollments"
+    __table_args__ = (
+        UniqueConstraint("firm_id", "phone_number_id", "provider_sender_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    firm_id: Mapped[str] = mapped_column(ForeignKey("firms.id"), index=True)
+    phone_number_id: Mapped[str] = mapped_column(ForeignKey("whatsapp_phone_numbers.id"), index=True)
+    provider_sender_id: Mapped[str] = mapped_column(String(64))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    status: Mapped[str] = mapped_column(String(20), default="active")
+    consent_reference: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    consent_recorded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class CustomerContact(Base):
+    __tablename__ = "customer_contacts"
+    __table_args__ = (UniqueConstraint("firm_id", "phone_hash"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    firm_id: Mapped[str] = mapped_column(ForeignKey("firms.id"), index=True)
+    phone_hash: Mapped[str] = mapped_column(String(64))
+    display_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    opt_in_recorded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    opted_out_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ProjectContactAssociation(Base):
+    __tablename__ = "project_contact_associations"
+    __table_args__ = (UniqueConstraint("firm_id", "project_id", "contact_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    firm_id: Mapped[str] = mapped_column(ForeignKey("firms.id"), index=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"), index=True)
+    contact_id: Mapped[str] = mapped_column(ForeignKey("customer_contacts.id"), index=True)
+
+
+class MessageEvent(Base):
+    __tablename__ = "whatsapp_message_events"
+    __table_args__ = (UniqueConstraint("firm_id", "provider_message_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    firm_id: Mapped[str] = mapped_column(ForeignKey("firms.id"), index=True)
+    phone_number_id: Mapped[str] = mapped_column(ForeignKey("whatsapp_phone_numbers.id"), index=True)
+    provider_message_id: Mapped[str] = mapped_column(String(160))
+    direction: Mapped[str] = mapped_column(String(12))
+    event_type: Mapped[str] = mapped_column(String(32))
+    payload_sha256: Mapped[str] = mapped_column(String(64))
+    processing_state: Mapped[str] = mapped_column(String(20), default="queued")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+
+class OutboundDelivery(Base):
+    __tablename__ = "whatsapp_outbound_deliveries"
+    __table_args__ = (UniqueConstraint("firm_id", "idempotency_key"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    firm_id: Mapped[str] = mapped_column(ForeignKey("firms.id"), index=True)
+    idempotency_key: Mapped[str] = mapped_column(String(160))
+    provider_message_id: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    recipient_hash: Mapped[str] = mapped_column(String(64))
+    version_id: Mapped[str | None] = mapped_column(ForeignKey("quote_versions.id"), nullable=True)
+    state: Mapped[str] = mapped_column(String(24), default="queued")
+    last_error: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+
 class Project(Base):
     __tablename__ = "projects"
     id: Mapped[str] = mapped_column(String(36), primary_key=True)

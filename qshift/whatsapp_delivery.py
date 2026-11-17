@@ -1,6 +1,7 @@
 """Preview or deliver queued staff pilot replies. Live delivery is opt-in."""
 
 import argparse
+import hashlib
 import http.client
 import json
 import logging
@@ -19,7 +20,7 @@ from sqlalchemy.orm import Session
 
 from qshift.agent.local_model import LocalModelUnavailable
 from qshift.db import engine
-from qshift.models import Draft, Quote, QuoteVersion, now_utc
+from qshift.models import Draft, OutboundDelivery, Quote, QuoteVersion, now_utc
 from qshift.services import canonical_hash, render_pdf
 from qshift.whatsapp_pilot import (
     PILOT_FIRM,
@@ -90,7 +91,7 @@ def meta_request(path: str, token: str, body: bytes, content_type: str) -> dict:
         connection.close()
 
 
-def send_message(credentials: WebhookCredentials, token: str, version: str, message: dict) -> None:
+def send_message(credentials: WebhookCredentials, token: str, version: str, message: dict) -> str:
     payload = json.dumps(
         {
             "messaging_product": "whatsapp",
@@ -109,13 +110,14 @@ def send_message(credentials: WebhookCredentials, token: str, version: str, mess
         raise DeliveryError("Meta response did not confirm acceptance") from exc
     if not isinstance(message_id, str) or not message_id.startswith("wamid."):
         raise DeliveryError("Meta response did not confirm acceptance")
+    return message_id
 
 
-def meta_sender(credentials: WebhookCredentials) -> Callable[[str], None]:
+def meta_sender(credentials: WebhookCredentials) -> Callable[[str], str]:
     token, version = meta_config()
 
-    def send(text: str) -> None:
-        send_message(
+    def send(text: str) -> str:
+        return send_message(
             credentials,
             token,
             version,
@@ -128,11 +130,11 @@ def meta_sender(credentials: WebhookCredentials) -> Callable[[str], None]:
     return send
 
 
-def meta_document_sender(credentials: WebhookCredentials) -> Callable[[bytes], None]:
+def meta_document_sender(credentials: WebhookCredentials) -> Callable[[bytes], str]:
     token, version = meta_config()
     filename = "QShift-fictional-pilot-quote.pdf"
 
-    def send(pdf: bytes) -> None:
+    def send(pdf: bytes) -> str:
         boundary = secrets.token_hex(24)
         body = (
             (
@@ -153,7 +155,7 @@ def meta_document_sender(credentials: WebhookCredentials) -> Callable[[bytes], N
         media_id = result.get("id")
         if not isinstance(media_id, str) or not re.fullmatch(r"[0-9]+", media_id):
             raise DeliveryError("Meta response did not confirm the PDF upload")
-        send_message(
+        return send_message(
             credentials,
             token,
             version,
@@ -250,7 +252,7 @@ def deliver_first_quote(
 def deliver_pending_pdf(
     database: Engine,
     credentials: WebhookCredentials,
-    send: Callable[[bytes], None],
+    send: Callable[[bytes], str | None],
 ) -> str:
     """Deliver the exact human-approved revision queued by the WhatsApp agent.
 
@@ -295,6 +297,16 @@ def deliver_pending_pdf(
             "Fictional project",
             fictional_test=True,
         )
+        session.add(
+            OutboundDelivery(
+                id=secrets.token_hex(18),
+                firm_id=identity[0],
+                idempotency_key=f"pdf:{version.id}",
+                recipient_hash=hashlib.sha256(credentials.sender_id.encode()).hexdigest(),
+                version_id=version.id,
+                state="processing",
+            )
+        )
         conversation.document_state = "attempted"
 
     # Mark the attempt before transport. An unknown timeout is never retried
@@ -304,11 +316,12 @@ def deliver_pending_pdf(
         authorized = conversation is not None and conversation.has_active_consent(
             now_utc() + 2 * MIN_WINDOW_REMAINING
         )
+    provider_message_id: str | None = None
     if not authorized:
         state = "suppressed"
     else:
         try:
-            send(pdf)
+            provider_message_id = send(pdf)
         except DeliveryError as exc:
             logging.warning("WhatsApp approved PDF needs review: %s", exc)
             state = "needs_review"
@@ -318,6 +331,19 @@ def deliver_pending_pdf(
         conversation = session.get(Conversation, identity)
         if conversation is not None:
             conversation.document_state = state
+        delivery = session.scalar(
+            select(OutboundDelivery).where(
+                OutboundDelivery.firm_id == identity[0],
+                OutboundDelivery.idempotency_key == f"pdf:{conversation.pending_version_id}"
+                if conversation is not None and conversation.pending_version_id
+                else "",
+            )
+        )
+        if delivery is not None:
+            delivery.state = state
+            delivery.provider_message_id = provider_message_id
+            if state == "needs_review":
+                delivery.last_error = "Provider outcome unknown or transport failed"
     return state
 
 
@@ -336,7 +362,7 @@ def ready_replies(identity: tuple[str, str], now: datetime):
 
 
 def deliver_next(
-    database: Engine, credentials: WebhookCredentials, send: Callable[[str], None]
+    database: Engine, credentials: WebhookCredentials, send: Callable[[str], str | None]
 ) -> str | None:
     identity = (PILOT_FIRM, enrollment_key(credentials))
     with Session(database) as session:
@@ -352,6 +378,14 @@ def deliver_next(
             return None
         receipt.delivery_state = "attempted"
         receipt_key = (*identity, receipt.message_hash)
+        delivery = OutboundDelivery(
+            id=secrets.token_hex(18),
+            firm_id=identity[0],
+            idempotency_key=f"reply:{receipt.message_hash}",
+            recipient_hash=hashlib.sha256(credentials.sender_id.encode()).hexdigest(),
+            state="processing",
+        )
+        session.add(delivery)
         text = reply_text(receipt.reply)
         source_sent_at = receipt.source_sent_at
         assert source_sent_at is not None
@@ -364,11 +398,12 @@ def deliver_next(
         conversation = session.get(Conversation, identity)
         now = now_utc()
         authorized = conversation is not None and conversation.has_active_consent(now)
+    provider_message_id: str | None = None
     if not authorized or now + MIN_WINDOW_REMAINING >= source_sent_at + REPLY_WINDOW:
         state = "suppressed"
     else:
         try:
-            send(text)
+            provider_message_id = send(text)
         except DeliveryError as exc:
             logging.warning("WhatsApp reply needs review: %s", exc)
             state = "needs_review"
@@ -379,6 +414,17 @@ def deliver_next(
         receipt = session.get(Receipt, receipt_key)
         if receipt is not None:
             receipt.delivery_state = state
+        delivery = session.scalar(
+            select(OutboundDelivery).where(
+                OutboundDelivery.firm_id == identity[0],
+                OutboundDelivery.idempotency_key == f"reply:{receipt_key[2]}",
+            )
+        )
+        if delivery is not None:
+            delivery.state = state
+            delivery.provider_message_id = provider_message_id
+            if state == "needs_review":
+                delivery.last_error = "Provider outcome unknown or transport failed"
     return state
 
 

@@ -32,6 +32,14 @@ class IncomingText:
     sent_at: datetime | None = None
 
 
+@dataclass(frozen=True)
+class IncomingStatus:
+    message_id: str
+    status: str
+    recipient_id: str | None = None
+    occurred_at: datetime | None = None
+
+
 class TextBody(BaseModel):
     body: str
 
@@ -51,6 +59,7 @@ class Metadata(BaseModel):
 class EventValue(BaseModel):
     metadata: Metadata | None = None
     messages: list[dict] = Field(default_factory=list)
+    statuses: list[dict] = Field(default_factory=list)
 
 
 class Change(BaseModel):
@@ -116,8 +125,35 @@ def staff_texts(event: Event, credentials: WebhookCredentials) -> Iterator[Incom
                     yield IncomingText(message.id, body, provider_time(message.timestamp))
 
 
+def delivery_statuses(event: Event, credentials: WebhookCredentials) -> Iterator[IncomingStatus]:
+    if event.object != "whatsapp_business_account":
+        return
+    for entry in event.entry:
+        if entry.id != credentials.account_id:
+            continue
+        for change in entry.changes:
+            value = change.value
+            if change.field != "messages" or value.metadata is None:
+                continue
+            if value.metadata.phone_number_id != credentials.phone_number_id:
+                continue
+            for raw in value.statuses:
+                message_id = raw.get("id")
+                status = raw.get("status")
+                if not isinstance(message_id, str) or not isinstance(status, str):
+                    continue
+                yield IncomingStatus(
+                    message_id,
+                    status,
+                    raw.get("recipient_id") if isinstance(raw.get("recipient_id"), str) else None,
+                    provider_time(raw.get("timestamp")),
+                )
+
+
 def webhook_routes(
-    credentials: WebhookCredentials, handle_messages: Callable[[list[IncomingText]], None]
+    credentials: WebhookCredentials,
+    handle_messages: Callable[[list[IncomingText]], None],
+    handle_statuses: Callable[[list[IncomingStatus]], None] | None = None,
 ) -> APIRouter:
     router = APIRouter()
 
@@ -155,6 +191,9 @@ def webhook_routes(
         messages = list(staff_texts(event, credentials))
         if messages:
             await run_in_threadpool(handle_messages, messages)
+        statuses = list(delivery_statuses(event, credentials))
+        if statuses and handle_statuses is not None:
+            await run_in_threadpool(handle_statuses, statuses)
         return {"ok": True}
 
     return router
