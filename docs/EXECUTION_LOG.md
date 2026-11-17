@@ -210,7 +210,7 @@ Verification:
 
 ```text
 make test
-53 passed, 1 warning; engine/approval coverage 94%
+54 passed, 1 warning; engine/approval coverage 94%
 
 make lint
 Ruff passed; configured engine/approval mypy passed
